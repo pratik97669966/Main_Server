@@ -3,7 +3,7 @@ const express = require('express');
 const moment = require('moment');
 const bodyParser = require('body-parser');
 const app = express();
-const cron = require('cron');
+const cron = require("node-cron");
 
 const port = process.env.PORT || 3000;
 

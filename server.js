@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const cron = require('cron');
 
+const port = process.env.PORT || 3000;
 
 // Initialize Firebase Admin SDK
 const serviceAccount = require('./KEY.json');
@@ -63,6 +64,6 @@ app.post('/schedule-notification', async (req, res) => {
 
 
 // Start the server
-app.listen(3000, () => {
-  console.log('Server listening on port 3000');
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });

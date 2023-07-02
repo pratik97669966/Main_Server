@@ -10,7 +10,7 @@ const io = require('socket.io')(server, {
 io.sockets.setMaxListeners(5000);
 
 const PID = process.pid;
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 console.log('Deployment Done !!');
 app.use(express.static(path.join(__dirname, 'public')));

@@ -44,6 +44,7 @@ io.on("connection", async (socket) => {
   try {
     socket.on("join-room", async (roomId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
       socket.join(roomId);
+      console.log("User joined room:", roomId + " user " + userName);
       const user = {
         uId,
         userName,
@@ -64,7 +65,7 @@ io.on("connection", async (socket) => {
     });
 
     socket.on("update-user", async (roomId, uId, updatedData) => {
-      await Room.findOneAndUpdate(
+      await Room.updateOne(
         { roomId, "users.uId": uId },
         { $set: { "users.$": updatedData } }
       );
@@ -90,6 +91,7 @@ io.on("connection", async (socket) => {
     console.error("Socket error:", error);
   }
 });
+
 
 
 server.listen(PORT, () => {

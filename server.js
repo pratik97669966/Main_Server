@@ -1,6 +1,8 @@
 const express = require("express");
-const http = require("http");
-const socketIO = require("socket.io");
+const app = express();
+const server = require("http").createServer(app);
+const io = require("socket.io")(server);
+const moment = require('moment');
 const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
 
@@ -25,9 +27,7 @@ const Room = mongoose.model("Room", new mongoose.Schema({
   }]
 }));
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIO(server);
+
 
 app.set("view engine", "ejs");
 app.use(express.static("public"));
@@ -36,15 +36,13 @@ app.get("/", (req, res) => {
   res.redirect(`/${uuidv4()}`);
 });
 
-app.get("/:room", (req, res) => {
-  res.render("room", { roomId: req.params.room });
-});
-
 io.on("connection", async (socket) => {
+  console.log(`onconnection: ${socket}`);
   try {
     socket.on("join-room", async (roomId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
       socket.join(roomId);
-      console.log("User joined room:", roomId + " user " + userName);
+      console.log(`User joined room: ${roomId}`);
+      console.log(`User joined : ${userName}`);
       const user = {
         uId,
         userName,
@@ -54,11 +52,17 @@ io.on("connection", async (socket) => {
         microphone,
         listenOnly
       };
-      await Room.findOneAndUpdate(
+       Room.findOneAndUpdate(
         { roomId },
         { $addToSet: { users: user } },
         { upsert: true, new: true }
-      );
+      ).then((usersList) => {
+        const savedMessage = chatMessage.messages[chatMessage.messages.length - 1]; // Get the last message in the array
+        io.to(roomId).emit("createMessage", savedMessage, userName); // Emit the saved message instead of the original message
+      })
+      .catch((error) => {
+        console.error(error);
+      });
       const updatedRoom = await Room.findOne({ roomId });
       const users = updatedRoom ? updatedRoom.users : [];
       io.to(roomId).emit("user-list", users);

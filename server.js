@@ -57,15 +57,14 @@ io.on("connection", async (socket) => {
         { $addToSet: { users: user } },
         { upsert: true, new: true }
       ).then((usersList) => {
-        const savedMessage = chatMessage.messages[chatMessage.messages.length - 1]; // Get the last message in the array
-        io.to(roomId).emit("createMessage", savedMessage, userName); // Emit the saved message instead of the original message
+        io.to(roomId).emit("user-list", usersList ? usersList.users : []); // Emit the saved message instead of the original message
       })
       .catch((error) => {
         console.error(error);
       });
-      const updatedRoom = await Room.findOne({ roomId });
-      const users = updatedRoom ? updatedRoom.users : [];
-      io.to(roomId).emit("user-list", users);
+      // const updatedRoom = await Room.findOne({ roomId });
+      // const users = updatedRoom ? updatedRoom.users : [];
+      // io.to(roomId).emit("user-list", users);
     });
 
     socket.on("update-user", async (roomId, uId, updatedData) => {

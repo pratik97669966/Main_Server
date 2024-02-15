@@ -18,6 +18,7 @@ const Room = mongoose.model("Room", new mongoose.Schema({
   roomId: String,
   users: [{
     uId: String,
+    socketId: String, // Add socketId field to track socket IDs
     userName: String,
     profile: String,
     verified: Boolean,
@@ -27,8 +28,6 @@ const Room = mongoose.model("Room", new mongoose.Schema({
   }]
 }));
 
-
-
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 
@@ -37,14 +36,12 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", async (socket) => {
-  console.log(`onconnection: ${socket}`);
   try {
     socket.on("join-room", async (roomId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
       socket.join(roomId);
-      console.log(`User joined room: ${roomId}`);
-      console.log(`User joined : ${userName}`);
       const user = {
         uId,
+        socketId: socket.id, // Assign the socket ID to the user
         userName,
         profile,
         verified,
@@ -52,19 +49,14 @@ io.on("connection", async (socket) => {
         microphone,
         listenOnly
       };
-       Room.findOneAndUpdate(
+      await Room.findOneAndUpdate(
         { roomId },
         { $addToSet: { users: user } },
         { upsert: true, new: true }
-      ).then((usersList) => {
-        io.to(roomId).emit("user-list", usersList ? usersList.users : []); // Emit the saved message instead of the original message
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-      // const updatedRoom = await Room.findOne({ roomId });
-      // const users = updatedRoom ? updatedRoom.users : [];
-      // io.to(roomId).emit("user-list", users);
+      );
+      const updatedRoom = await Room.findOne({ roomId });
+      const users = updatedRoom ? updatedRoom.users : [];
+      io.to(roomId).emit("user-list", users);
     });
 
     socket.on("update-user", async (roomId, uId, updatedData) => {
@@ -78,24 +70,27 @@ io.on("connection", async (socket) => {
     });
 
     socket.on("disconnect", async () => {
-      const rooms = Object.keys(socket.rooms);
-      const roomId = rooms.find(room => room !== socket.id);
-      if (roomId) {
-        await Room.findOneAndUpdate(
-          { roomId },
-          { $pull: { users: { uId: socket.id } } }
-        );
-        const updatedRoom = await Room.findOne({ roomId });
-        const users = updatedRoom ? updatedRoom.users : [];
-        io.to(roomId).emit("user-list", users);
+      try {
+        const rooms = Object.keys(socket.rooms);
+        const roomId = rooms.find(room => room !== socket.id);
+        if (roomId) {
+          await Room.updateOne(
+            { roomId },
+            { $pull: { users: { socketId: socket.id } } } // Remove by socketId
+          );
+          const updatedRoom = await Room.findOne({ roomId });
+          const users = updatedRoom ? updatedRoom.users : [];
+          io.to(roomId).emit("user-list", users);
+        }
+      } catch (error) {
+        console.error("Error on disconnect:", error);
       }
     });
+    
   } catch (error) {
     console.error("Socket error:", error);
   }
 });
-
-
 
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);

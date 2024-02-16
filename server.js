@@ -4,6 +4,7 @@ const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 const moment = require('moment');
 const mongoose = require("mongoose");
+const path = require('path'); // Require the path module
 const { v4: uuidv4 } = require("uuid");
 
 const PORT = process.env.PORT || 3030;
@@ -108,4 +109,3 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
   .catch((err) => {
     console.log('Error connecting to MongoDB:', err);
   });
-

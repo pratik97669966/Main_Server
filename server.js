@@ -29,8 +29,7 @@ app.get("/", (req, res) => {
   res.redirect(`/${uuidv4()}`);
 });
 
-// Connect to MongoDB
-MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true, poolSize: 500 })
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true, poolSize: 500 })
   .then((client) => {
     console.log('Connected to MongoDB with data clear');
     Room.deleteMany({})
@@ -46,7 +45,7 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true,
     io.on("connection", async (socket) => {
       try {
         connectedUsers[socket.id] = socket;
-    
+
         socket.on("join-room", async (roomId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
           socket.join(roomId);
           const user = {
@@ -68,7 +67,7 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true,
           const users = updatedRoom ? updatedRoom.users : [];
           io.to(roomId).emit("user-list", users);
         });
-    
+
         socket.on("update-user", async (roomId, uId, updatedData) => {
           await Room.updateOne(
             { roomId, "users.uId": uId },
@@ -78,7 +77,7 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true,
           const users = updatedRoom ? updatedRoom.users : [];
           io.to(roomId).emit("user-list", users);
         });
-    
+
         socket.on("disconnect", async () => {
           try {
             const rooms = Object.keys(socket.rooms);
@@ -96,12 +95,12 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true,
             console.error("Error on disconnect:", error);
           }
         });
-        
+
       } catch (error) {
         console.error("Socket error:", error);
       }
     });
-    
+
     server.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);
     });

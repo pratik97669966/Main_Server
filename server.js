@@ -29,7 +29,7 @@ app.get("/", (req, res) => {
   res.redirect(`/${uuidv4()}`);
 });
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true, poolSize: 500 })
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, poolSize: 500 })
   .then((client) => {
     console.log('Connected to MongoDB with data clear');
     Room.deleteMany({})

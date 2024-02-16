@@ -121,7 +121,20 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             console.error("Error on disconnect:", error);
           }
         });
-        
+        socket.on("remove-user",async (roomId, userId) => {
+          try {
+              await Room.findOneAndDelete(
+                { roomId },
+                { $pull: { users: { uId: userId } } }
+              );
+              const updatedRoom = await Room.findOne({ roomId });
+              const users = updatedRoom ? updatedRoom.users : [];
+              io.to(roomId).emit("user-list", users);
+           
+          } catch (error) {
+            console.error("Error on disconnect:", error);
+          }
+        });
  });
       } catch (error) {
         console.error("Socket error:", error);

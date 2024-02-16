@@ -97,6 +97,11 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
         });
         socket.on("disconnect", async () => {
           try {
+            const rooms = Object.keys(socket.rooms);
+            // Filter out the rooms where the room ID is not equal to the socket ID
+            const disconnectRooms = rooms.filter(room => room !== socket.id);
+            
+            for (const roomId of disconnectRooms) {
               await Room.updateOne(
                 { roomId },
                 { $pull: { users: { socketId: socket.id } } } // Remove by socketId
@@ -104,11 +109,12 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
               const updatedRoom = await Room.findOne({ roomId });
               const users = updatedRoom ? updatedRoom.users : [];
               io.to(roomId).emit("user-list", users);
-           
+            }
           } catch (error) {
             console.error("Error on disconnect:", error);
           }
         });
+        
  });
       } catch (error) {
         console.error("Socket error:", error);

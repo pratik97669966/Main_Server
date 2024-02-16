@@ -50,7 +50,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           socket.join(roomId);
           const user = {
             uId,
-            socketId: socket.id, // Assign the socket ID to the user
+            socketId: socket.id,
             userName,
             profile,
             verified,

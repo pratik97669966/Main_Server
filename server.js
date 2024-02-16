@@ -78,23 +78,6 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           const users = updatedRoom ? updatedRoom.users : [];
           io.to(roomId).emit("user-list", users);
         });
-        socket.on('disconnect', () => {
-          usersCollection.findOneAndDelete({ id: socket.id })
-            .then((result) => {
-              const user = result.value;
-              if (user) {
-                io.emit('user-removed', user);
-              }
-            })
-            .catch((err) => {
-              console.log('Error removing user from MongoDB:', err);
-            });
-          const index = connectedUsers.findIndex((user) => user.id === socket.id);
-          if (index !== -1) {
-            connectedUsers.splice(index, 1);
-            console.log(`User ${socket.id} connectedUsers`);
-          }
-        });
         socket.on("disconnect", async () => {
           try {
             const rooms = Object.keys(socket.rooms);

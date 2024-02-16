@@ -33,12 +33,7 @@ app.get("/", (req, res) => {
 MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true, poolSize: 500 })
   .then((client) => {
     console.log('Connected to MongoDB with data clear');
-
-    const db = client.db('HomeScreen');
-    const usersCollection = db.collection('instanttalk');
-
-    // Add this block to delete all documents from the collection on server restart
-    usersCollection.deleteMany({})
+    Room.deleteMany({})
       .then(() => {
         console.log('All documents deleted from users collection on server restart');
       })
@@ -47,17 +42,6 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true,
       });
 
     app.use(express.static(path.join(__dirname, 'public')));
-
-    // Send the list of all users to the connected client
-    const sendUsersList = (socket) => {
-      usersCollection.find().toArray()
-        .then((users) => {
-          socket.emit('users-list', users);
-        })
-        .catch((err) => {
-          console.log('Error getting users from MongoDB:', err);
-        });
-    };
 
     io.on("connection", async (socket) => {
       try {

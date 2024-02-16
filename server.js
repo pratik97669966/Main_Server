@@ -107,6 +107,13 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
               console.error("Error on room:", error);
             }
           });
+          socket.on("room-update", async (roomId,room) => {
+            try {
+                io.to(roomId).emit("room-change", room);
+            } catch (error) {
+              console.error("Error on room:", error);
+            }
+          });
         socket.on("disconnect", async () => {
           try {
               await Room.findOneAndDelete(

@@ -68,16 +68,27 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           const users = updatedRoom ? updatedRoom.users : [];
           io.to(roomId).emit("user-list", users);
        
-        socket.on("update-user", async (roomId, uId, updatedData) => {
-          updatedData.socketId = socket.id;
-          await Room.findOneAndUpdate(
-            { roomId },
-            { $set: { users: updatedData } },
-          );
-          const updatedRoom = await Room.findOne({ roomId });
-          const users = updatedRoom ? updatedRoom.users : [];
-          io.to(roomId).emit("user-list", users);
-        });
+          socket.on("update-user", async (roomId, uId, updatedData) => {
+            try {
+              if (updatedData) {
+                updatedData.socketId = socket.id;
+                await Room.findOneAndUpdate(
+                  { roomId, "users.uId": uId },
+                  { $set: { "users.$": updatedData } },
+                  { new: true }
+                );
+          
+                const updatedRoom = await Room.findOne({ roomId });
+                const users = updatedRoom ? updatedRoom.users : [];
+                io.to(roomId).emit("user-list", users);
+              } else {
+                console.error("No updated data provided.");
+              }
+            } catch (error) {
+              console.error("Error updating user:", error);
+            }
+          });
+          
         socket.on("disconnect", async () => {
           try {
               await Room.findOneAndDelete(

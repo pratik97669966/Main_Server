@@ -70,9 +70,10 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
        
 
         socket.on("update-user", async (roomId, uId, updatedData) => {
-          await Room.updateOne(
-            { roomId, "users.uId": uId },
-            { $set: { "users.$": updatedData } }
+          await Room.findOneAndUpdate(
+            { roomId },
+            { $addToSet: { users: updatedData } },
+            { upsert: true, new: true }
           );
           const updatedRoom = await Room.findOne({ roomId });
           const users = updatedRoom ? updatedRoom.users : [];

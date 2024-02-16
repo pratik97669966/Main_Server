@@ -94,7 +94,19 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
               console.error("Error updating user:", error);
             }
           });
-          
+          socket.on("room-delete", async (roomuId) => {
+            try {
+              await Room.findOneAndUpdate(
+                { roomuId },
+                { $set: { users: [] } }
+              );
+                const users =  [];
+                io.to(roomId).emit("user-list", users);
+             
+            } catch (error) {
+              console.error("Error on room:", error);
+            }
+          });
         socket.on("disconnect", async () => {
           try {
               await Room.findOneAndDelete(

@@ -63,10 +63,15 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             { roomId },
             { $addToSet: { users: user } },
             { upsert: true, new: true }
-          );
-          const updatedRoom = await Room.findOne({ roomId });
-          const users = updatedRoom ? updatedRoom.users : [];
-          io.to(roomId).emit("user-list", users);
+          ).then(async () => {
+            const updatedRoom = await Room.findOne({ roomId });
+            const users = updatedRoom ? updatedRoom.users : [];
+            io.to(roomId).emit("user-list", users);
+          })
+            .catch((err) => {
+
+            });
+
 
           socket.on("update-user", async (roomId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
             try {
@@ -85,11 +90,14 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
                 { roomId, "users.uId": uId },
                 { $set: { "users.$": user } },
                 { new: true }
-              );
+              ).then(async () => {
+                const updatedRoom = await Room.findOne({ roomId });
+                const users = updatedRoom ? updatedRoom.users : [];
+                io.to(roomId).emit("user-list", users);
+              })
+                .catch((err) => {
 
-              const updatedRoom = await Room.findOne({ roomId });
-              const users = updatedRoom ? updatedRoom.users : [];
-              io.to(roomId).emit("user-list", users);
+                });
             } catch (error) {
               console.error("Error updating user:", error);
             }
@@ -116,14 +124,17 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           });
           socket.on("disconnect", async () => {
             try {
-              await Room.findOneAndDelete(
-                { roomId },
+              await Room.findOneAndUpdate(
+                { roomId, "users.uId": uId },
                 { $pull: { users: { socketId: socket.id } } }
-              );
-              const updatedRoom = await Room.findOne({ roomId });
-              const users = updatedRoom ? updatedRoom.users : [];
-              io.to(roomId).emit("user-list", users);
+              ).then(async () => {
+                const updatedRoom = await Room.findOne({ roomId });
+                const users = updatedRoom ? updatedRoom.users : [];
+                io.to(roomId).emit("user-list", users);
+              })
+                .catch((err) => {
 
+                });
             } catch (error) {
               console.error("Error on disconnect:", error);
             }
@@ -133,11 +144,14 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
               await Room.findOneAndDelete(
                 { roomId },
                 { $pull: { users: { uId: userId } } }
-              );
-              const updatedRoom = await Room.findOne({ roomId });
-              const users = updatedRoom ? updatedRoom.users : [];
-              io.to(roomId).emit("user-list", users);
+              ).then(async () => {
+                const updatedRoom = await Room.findOne({ roomId });
+                const users = updatedRoom ? updatedRoom.users : [];
+                io.to(roomId).emit("user-list", users);
+              })
+                .catch((err) => {
 
+                });
             } catch (error) {
               console.error("Error on disconnect:", error);
             }

@@ -155,7 +155,6 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             console.error("Error on disconnect:", error);
           }
         });
-      });
   } catch (error) {
     console.error("Socket error:", error);
   }

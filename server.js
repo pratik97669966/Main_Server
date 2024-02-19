@@ -29,7 +29,7 @@ const connectedUsers = [];
 app.get("/", (req, res) => {
   res.redirect(`/${uuidv4()}`);
 });
-app.get("/", (req, res) => {
+app.get("/:uuid", (req, res) => {
   res.redirect(`/${uuidv4()}`);
 });
 

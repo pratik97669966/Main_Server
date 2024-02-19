@@ -107,7 +107,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           });
           socket.on("room-delete", async (roomuId) => {
             try {
-              await Room.findOneAndUpdate(
+              await Room.findOneAndDelete(
                 { roomuId },
                 { $set: { users: [] } }
               );

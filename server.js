@@ -29,6 +29,9 @@ const connectedUsers = [];
 app.get("/", (req, res) => {
   res.redirect(`/${uuidv4()}`);
 });
+app.get("/", (req, res) => {
+  res.redirect(`/${uuidv4()}`);
+});
 
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((client) => {

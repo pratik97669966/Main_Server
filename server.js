@@ -142,7 +142,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           socket.on("remove-user", async (roomId, userId) => {
             try {
               await Room.findOneAndDelete(
-                { roomId },
+                { roomId ,"users.uId": userId },
                 { $pull: { users: { uId: userId } } }
               ).then(async () => {
                 const updatedRoom = await Room.findOne({ roomId });

@@ -26,11 +26,11 @@ const Room = mongoose.model("Room", new mongoose.Schema({
 
 const connectedUsers = [];
 
+// app.get("/", (req, res) => {
+//   res.redirect(`/${uuidv4()}`);
+// });
 app.get("/", (req, res) => {
-  res.redirect(`/${uuidv4()}`);
-});
-app.get("/:uuid", (req, res) => {
-  res.redirect(`/${uuidv4()}`);
+   res.status(200).send("Welcome to our application!");
 });
 
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })

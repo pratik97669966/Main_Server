@@ -100,7 +100,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
                 io.to(roomId).emit("user-list", users);
               })
                 .catch((err) => {
-
+                  console.error("Error updating user:", err);
                 });
             } catch (error) {
               console.error("Error updating user:", error);

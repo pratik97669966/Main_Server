@@ -89,6 +89,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
                 microphone,
                 listenOnly
               };
+              console.log("call update-user",user);
               await Room.findOneAndUpdate(
                 { roomId},
                 { $set: { "users.$": user } },

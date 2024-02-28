@@ -76,36 +76,34 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             });
 
 
-          socket.on("update-user", async (roomId,socketId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
-            try {
-
-              const user = {
-                uId,
-                socketId,
-                userName,
-                profile,
-                verified,
-                coHost,
-                microphone,
-                listenOnly
-              };
-              console.log("call update-user",user);
-              await Room.findOneAndUpdate(
-                { roomId},
-                { $set: { users: user }},
-                { new: true }
-              ).then(async () => {
-                const updatedRoom = await Room.findOne({ roomId });
+            socket.on("update-user", async (roomId, socketId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
+              try {
+                const user = {
+                  uId,
+                  socketId,
+                  userName,
+                  profile,
+                  verified,
+                  coHost,
+                  microphone,
+                  listenOnly
+                };
+            
+                console.log("call update-user", user);
+            
+                const updatedRoom = await Room.findOneAndUpdate(
+                  { roomId, "users.socketId": socketId },
+                  { $set: { "users.$": user } },
+                  { new: true }
+                );
+            
                 const users = updatedRoom ? updatedRoom.users : [];
                 io.to(roomId).emit("user-list", users);
-              })
-                .catch((err) => {
-                  console.error("Error updating user:", err);
-                });
-            } catch (error) {
-              console.error("Error updating user:", error);
-            }
-          });
+              } catch (error) {
+                console.error("Error updating user:", error);
+              }
+            });
+            
           socket.on("room-delete", async (roomuId) => {
             try {
               await Room.findOneAndDelete(

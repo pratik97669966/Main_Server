@@ -76,12 +76,12 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             });
 
 
-          socket.on("update-user", async (roomId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
+          socket.on("update-user", async (roomId,socketId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
             try {
 
               const user = {
                 uId,
-                socketId: socket.id,
+                socketId,
                 userName,
                 profile,
                 verified,
@@ -90,7 +90,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
                 listenOnly
               };
               await Room.findOneAndUpdate(
-                { roomId, "users.uId": uId },
+                { roomId},
                 { $set: { "users.$": user } },
                 { new: true }
               ).then(async () => {
@@ -128,7 +128,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           socket.on("disconnect", async () => {
             try {
               await Room.findOneAndUpdate(
-                { roomId, "users.uId": uId },
+                { roomId},
                 { $pull: { users: { socketId: socket.id } } }
               ).then(async () => {
                 const updatedRoom = await Room.findOne({ roomId });

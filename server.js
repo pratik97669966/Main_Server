@@ -35,15 +35,7 @@ app.get("/", (req, res) => {
 
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((client) => {
-    console.log('Connected to MongoDB with data clear');
-    // Room.deleteMany({})
-    //   .then(() => {
-    //     console.log('All documents deleted from users collection on server restart');
-    //   })
-    //   .catch((err) => {
-    //     console.log('Error deleting documents from users collection on server restart:', err);
-    //   });
-
+   
     app.use(express.static(path.join(__dirname, 'public')));
 
     io.on("connection", async (socket) => {
@@ -88,9 +80,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
                   microphone,
                   listenOnly
                 };
-            
-                console.log("call update-user", user);
-            
+                        
                 const updatedRoom = await Room.findOneAndUpdate(
                   { roomId, "users.socketId": socketId },
                   { $set: { "users.$": user } },

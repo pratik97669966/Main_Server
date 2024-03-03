@@ -63,7 +63,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             try {
               const user = {
                 uId,
-                socketId:"",
+                socketId: "",
                 userName,
                 profile,
                 verified,
@@ -110,7 +110,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           socket.on("chat-message", (message) => {
             const createdAt = Date.now();
 
-            io.to(roomId).emit("message", { uid: uId, userName: userName, message: message, messageType: "messageType", profileUrl: profile, createdAt: createdAt });
+            io.to(roomId).emit("message", { uid: uId, userName: userName, message: message, messageType: "messageType", profileUrl: profile, createdAt: createdAt, isVerified: verified });
           });
           socket.on("disconnect", async () => {
             try {

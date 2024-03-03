@@ -43,7 +43,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           socket.join(roomId);
           const user = {
             uId,
-            socketId: socket.id,
+            socketId: "",
             userName,
             profile,
             verified,
@@ -67,7 +67,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             try {
               const user = {
                 uId,
-                socketId,
+                socketId:"",
                 userName,
                 profile,
                 verified,

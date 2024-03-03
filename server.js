@@ -2,8 +2,9 @@ const express = require("express");
 const app = express();
 const server = require("http").createServer(app);
 const io = require('socket.io')(server);
+const moment = require('moment');
 const mongoose = require("mongoose");
-const path = require('path');
+const path = require('path'); // Require the path module
 const { v4: uuidv4 } = require("uuid");
 
 const PORT = process.env.PORT || 3030;
@@ -38,7 +39,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           socket.join(roomId);
           const user = {
             uId,
-            socketId: socket.id,
+            socketId: "",
             userName,
             profile,
             verified,
@@ -50,90 +51,102 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             { roomId },
             { $addToSet: { users: user } },
             { upsert: true, new: true }
-          );
-          const updatedRoom = await Room.findOne({ roomId });
-          const users = updatedRoom ? updatedRoom.users : [];
-          io.to(roomId).emit("user-list", users);
-        });
-
-        socket.on("update-user", async (roomId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
-          try {
-            const user = {
-              uId,
-              socketId: socket.id,
-              userName,
-              profile,
-              verified,
-              coHost,
-              microphone,
-              listenOnly
-            };
-            await Room.findOneAndUpdate(
-              { roomId, "users.uId": uId },
-              { $set: { "users.$": user } },
-              { new: true }
-            );
+          ).then(async () => {
             const updatedRoom = await Room.findOne({ roomId });
             const users = updatedRoom ? updatedRoom.users : [];
             io.to(roomId).emit("user-list", users);
-          } catch (error) {
-            console.error("Error updating user:", error);
-          }
-        });
+          })
+            .catch((err) => {
 
-        socket.on("room-delete", async (roomId) => {
-          try {
-            await Room.findOneAndDelete(
-              { roomId }
-            );
-            io.to(roomId).emit("user-list", []);
-          } catch (error) {
-            console.error("Error deleting room:", error);
-          }
-        });
+            })
+          socket.on("update-user", async (roomId, socketId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
+            try {
+              const user = {
+                uId,
+                socketId: "",
+                userName,
+                profile,
+                verified,
+                coHost,
+                microphone,
+                listenOnly
+              };
+              await Room.findOneAndUpdate(
+                { roomId, "users.uId": uId },
+                { $set: { "users.$": user } },
+                { new: true }
+              ).then(async () => {
+                const updatedRoom = await Room.findOne({ roomId });
+                const users = updatedRoom ? updatedRoom.users : [];
+                io.to(roomId).emit("user-list", users);
+              }).catch((err) => {
 
-        socket.on("room-update", async (roomId, room) => {
-          try {
-            io.to(roomId).emit("room-change", room);
-          } catch (error) {
-            console.error("Error updating room:", error);
-          }
-        });
+              })
+            } catch (error) {
+              console.error("Error updating user:", error);
+            }
+          });
 
-        socket.on("chat-message", (roomId, uId, userName, message, profile) => {
-          const createdAt = Date.now();;
-          io.to(roomId).emit("message", { uId, userName, message, profile, createdAt });
-        });
-
-        socket.on("disconnect", async () => {
-          try {
-              await Room.updateOne(
-                { roomId },
-                { $pull: { users: { socketId: socket.id } } }
+          socket.on("room-delete", async (roomuId) => {
+            try {
+              await Room.findOneAndDelete(
+                { roomuId },
+                { $set: { users: [] } }
               );
-              const updatedRoom = await Room.findOne({ roomId });
-              const users = updatedRoom ? updatedRoom.users : [];
+              const users = [];
               io.to(roomId).emit("user-list", users);
-         
-          } catch (error) {
-            console.error("Error on disconnect:", error);
-          }
-        });
 
-        socket.on("remove-user", async (roomId, uId) => {
-          try {
-            await Room.updateOne(
-              { roomId },
-              { $pull: { users: { uId } } }
-            );
-            const updatedRoom = await Room.findOne({ roomId });
-            const users = updatedRoom ? updatedRoom.users : [];
-            io.to(roomId).emit("user-list", users);
-          } catch (error) {
-            console.error("Error removing user:", error);
-          }
-        });
+            } catch (error) {
+              console.error("Error on room:", error);
+            }
+          });
+          socket.on("room-update", async (roomId, room) => {
+            try {
+              io.to(roomId).emit("room-change", [room]);
+            } catch (error) {
+              console.error("Error on room:", error);
+            }
+          });
+          socket.on("chat-message", (message) => {
+            const createdAt = Date.now();
 
+            io.to(roomId).emit("message", { uid: uId, userName: userName, message: message, messageType: "messageType", profileUrl: profile, createdAt: createdAt, isVerified: verified });
+          });
+          socket.on("disconnect", async () => {
+            try {
+              await Room.findOneAndUpdate(
+                { roomId, "users.uId": uId },
+                { $pull: { users: { uId: uId } } }
+              ).then(async () => {
+                const updatedRoom = await Room.findOne({ roomId });
+                const users = updatedRoom ? updatedRoom.users : [];
+                io.to(roomId).emit("user-list", users);
+              })
+                .catch((err) => {
+                  L̥
+                });
+            } catch (error) {
+              console.error("Error on disconnect:", error);
+            }
+          });
+          socket.on("remove-user", async (roomId, userId) => {
+            try {
+              await Room.findOneAndUpdate(
+                { roomId, "users.uId": userId },
+                { $pull: { users: { uId: userId } } }
+              ).then(async () => {
+                const updatedRoom = await Room.findOne({ roomId });
+                const users = updatedRoom ? updatedRoom.users : [];
+                io.to(roomId).emit("user-list", users);
+              })
+                .catch((err) => {
+
+                });
+            } catch (error) {
+              console.error("Error on disconnect:", error);
+            }
+          });
+        });
       } catch (error) {
         console.error("Socket error:", error);
       }

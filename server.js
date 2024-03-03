@@ -28,11 +28,6 @@ const Room = mongoose.model("Room", new mongoose.Schema({
   }]
 }));
 
-const connectedUsers = [];
-
-// app.get("/", (req, res) => {
-//   res.redirect(`/${uuidv4()}`);
-// });
 app.get("/", (req, res) => {
    res.status(200).send("Welcome to our application!");
 });
@@ -44,8 +39,6 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
 
     io.on("connection", async (socket) => {
       try {
-        connectedUsers[socket.id] = socket;
-
         socket.on("join-room", async (roomId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
           socket.join(roomId);
           const user = {
@@ -69,9 +62,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           })
             .catch((err) => {
 
-            });
-
-
+            })
             socket.on("update-user", async (roomId, socketId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
               try {
                 const user = {
@@ -86,7 +77,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
                 };
                         
                 const updatedRoom = await Room.findOneAndUpdate(
-                  { roomId, "users.socketId": socketId },
+                  { roomId, "users.uId": uId },
                   { $set: { "users.$": user } },
                   { new: true }
                 );
@@ -121,8 +112,8 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           socket.on("disconnect", async () => {
             try {
               await Room.findOneAndUpdate(
-                { roomId, "users.socketId": socket.id },
-                { $pull: { users: { socketId: socket.id } } }
+                { roomId ,"users.uId": uId },
+                { $pull: { users: { uId: uId } } }
               ).then(async () => {
                 const updatedRoom = await Room.findOne({ roomId });
                 const users = updatedRoom ? updatedRoom.users : [];

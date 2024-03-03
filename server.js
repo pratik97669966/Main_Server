@@ -111,6 +111,11 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
               console.error("Error on room:", error);
             }
           });
+          socket.on("chat-message", (message) => {
+            const createdAt = Date.now();
+
+            io.to(roomId).emit("message", { uid: uId, userName: userName, message: message, messageType: "messageType", profileUrl: profile, createdAt: createdAt });
+          });
           socket.on("disconnect", async () => {
             try {
               await Room.findOneAndUpdate(
@@ -127,10 +132,6 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             } catch (error) {
               console.error("Error on disconnect:", error);
             }
-          });
-          socket.on("chat-message", (message) => {
-            const createdAt = Date.now();
-            io.to(roomId).emit("message", { uid: uId, userName: userName, message: message, messageType: messageType, profileUrl: profile, createdAt: createdAt });
           });
           socket.on("remove-user", async (roomId, userId) => {
             try {

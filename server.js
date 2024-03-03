@@ -78,7 +78,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
                         
                 const updatedRoom = await Room.findOneAndUpdate(
                   { roomId, "users.uId": uId },
-                  { $set: { "users.$": user } },
+                  { $set:{ users: { uId: uId } } },
                   { new: true }
                 );
             

@@ -3,7 +3,7 @@ const app = express();
 const server = require("http").createServer(app);
 const io = require('socket.io')(server, {
   pingInterval: 10000,
-  pingTimeout: 5000,
+  pingTimeout: 30000,
   maxHttpBufferSize: 1e8,
 });
 const moment = require('moment');

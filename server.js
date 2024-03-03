@@ -75,15 +75,17 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
                   microphone,
                   listenOnly
                 };
-                        
-                const updatedRoom = await Room.findOneAndUpdate(
+                await Room.findOneAndUpdate(
                   { roomId, "users.uId": uId },
                   { $set: { "users.$": user } },
                   { new: true }
-                );
-            
-                const users = updatedRoom ? updatedRoom.users : [];
-                io.to(roomId).emit("user-list", users);
+                ).then(async () => {
+                  const updatedRoom = await Room.findOne({ roomId });
+                  const users = updatedRoom ? updatedRoom.users : [];
+                  io.to(roomId).emit("user-list", users);
+                }).catch((err) => {
+      
+                  })
               } catch (error) {
                 console.error("Error updating user:", error);
               }

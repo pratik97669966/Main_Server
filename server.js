@@ -129,7 +129,8 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             }
           });
           socket.on("chat-message", (message) => {
-            io.to(roomId).emit("chat-message", { uId, userName, message });
+            const timestamp = Date.now();
+            io.to(roomId).emit("chat-message", { uId, userName, message, timestamp });
         });
           socket.on("remove-user", async (roomId, userId) => {
             try {

@@ -128,6 +128,9 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
               console.error("Error on disconnect:", error);
             }
           });
+          socket.on("chat-message", (message) => {
+            io.to(roomId).emit("chat-message", { uId, userName, message });
+        });
           socket.on("remove-user", async (roomId, userId) => {
             try {
               await Room.findOneAndUpdate(

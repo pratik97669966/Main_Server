@@ -107,8 +107,6 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
 
         socket.on("disconnect", async () => {
           try {
-            const roomIds = Object.keys(socket.rooms);
-            for (const roomId of roomIds) {
               await Room.updateOne(
                 { roomId },
                 { $pull: { users: { socketId: socket.id } } }
@@ -116,7 +114,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
               const updatedRoom = await Room.findOne({ roomId });
               const users = updatedRoom ? updatedRoom.users : [];
               io.to(roomId).emit("user-list", users);
-            }
+         
           } catch (error) {
             console.error("Error on disconnect:", error);
           }

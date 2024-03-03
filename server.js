@@ -29,12 +29,12 @@ const Room = mongoose.model("Room", new mongoose.Schema({
 }));
 
 app.get("/", (req, res) => {
-   res.status(200).send("Welcome to our application!");
+  res.status(200).send("Welcome to our application!");
 });
 
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((client) => {
-   
+
     app.use(express.static(path.join(__dirname, 'public')));
 
     io.on("connection", async (socket) => {
@@ -63,34 +63,34 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             .catch((err) => {
 
             })
-            socket.on("update-user", async (roomId, socketId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
-              try {
-                const user = {
-                  uId,
-                  socketId,
-                  userName,
-                  profile,
-                  verified,
-                  coHost,
-                  microphone,
-                  listenOnly
-                };
-                await Room.findOneAndUpdate(
-                  { roomId, "users.uId": uId },
-                  { $set: { "users.$": user } },
-                  { new: true }
-                ).then(async () => {
-                  const updatedRoom = await Room.findOne({ roomId });
-                  const users = updatedRoom ? updatedRoom.users : [];
-                  io.to(roomId).emit("user-list", users);
-                }).catch((err) => {
-      
-                  })
-              } catch (error) {
-                console.error("Error updating user:", error);
-              }
-            });
-            
+          socket.on("update-user", async (roomId, socketId, uId, userName, profile, verified, coHost, microphone, listenOnly) => {
+            try {
+              const user = {
+                uId,
+                socketId,
+                userName,
+                profile,
+                verified,
+                coHost,
+                microphone,
+                listenOnly
+              };
+              await Room.findOneAndUpdate(
+                { roomId, "users.uId": uId },
+                { $set: { "users.$": user } },
+                { new: true }
+              ).then(async () => {
+                const updatedRoom = await Room.findOne({ roomId });
+                const users = updatedRoom ? updatedRoom.users : [];
+                io.to(roomId).emit("user-list", users);
+              }).catch((err) => {
+
+              })
+            } catch (error) {
+              console.error("Error updating user:", error);
+            }
+          });
+
           socket.on("room-delete", async (roomuId) => {
             try {
               await Room.findOneAndDelete(
@@ -114,7 +114,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
           socket.on("disconnect", async () => {
             try {
               await Room.findOneAndUpdate(
-                { roomId ,"users.uId": uId },
+                { roomId, "users.uId": uId },
                 { $pull: { users: { uId: uId } } }
               ).then(async () => {
                 const updatedRoom = await Room.findOne({ roomId });
@@ -129,13 +129,13 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
             }
           });
           socket.on("chat-message", (message) => {
-            const timestamp = Date.now();
-            io.to(roomId).emit("chat-message", { uId, userName, message, timestamp });
-        });
+            const createdAt = Date.now();
+            io.to(roomId).emit("message", { uid: uId, userName: userName, message: message, messageType: messageType, createdAt: createdAt });
+          });
           socket.on("remove-user", async (roomId, userId) => {
             try {
               await Room.findOneAndUpdate(
-                { roomId ,"users.uId": userId },
+                { roomId, "users.uId": userId },
                 { $pull: { users: { uId: userId } } }
               ).then(async () => {
                 const updatedRoom = await Room.findOne({ roomId });

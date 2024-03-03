@@ -1,11 +1,7 @@
 const express = require("express");
 const app = express();
 const server = require("http").createServer(app);
-const io = require('socket.io')(server, {
-  pingInterval: 10000,
-  pingTimeout: 30000,
-  maxHttpBufferSize: 1e8,
-});
+const io = require('socket.io')(server);
 const moment = require('moment');
 const mongoose = require("mongoose");
 const path = require('path'); // Require the path module

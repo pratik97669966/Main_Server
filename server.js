@@ -149,7 +149,7 @@ const generateUserId = async (prefix) => {
 const User = mongoose.model('User', userSchema);
 
 // Create a new user
-app.post('/createuser', async (req, res) => {
+app.post('/createnewuser', async (req, res) => {
   try {
     const { prefix, ...userData } = req.body;
 
@@ -199,7 +199,7 @@ app.get('/users/:userId', async (req, res) => {
 });
 
 // Get all users
-app.get('/users/all', async (req, res) => {
+app.get('/getallusers', async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);

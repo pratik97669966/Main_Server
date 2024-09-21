@@ -149,7 +149,7 @@ const generateUserId = async (prefix) => {
 const User = mongoose.model('User', userSchema);
 
 // Create a new user
-app.post('/users', async (req, res) => {
+app.post('/createuser', async (req, res) => {
   try {
     const { prefix, ...userData } = req.body;
 
@@ -169,7 +169,7 @@ app.post('/users', async (req, res) => {
 });
 
 // Update a user
-app.put('/users', async (req, res) => {
+app.put('/updateuser', async (req, res) => {
   const userData = req.body;
   const { userId } = userData;
   try {

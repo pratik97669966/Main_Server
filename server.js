@@ -186,7 +186,7 @@ app.put('/updateuser', async (req, res) => {
 // Get a user by userId
 app.get('/users/:userId', async (req, res) => {
   const { userId } = req.params;
-  console.log('getbyuserid ',req);
+  console.log('getbyuserid ', req);
   try {
     const user = await User.findOne({ userId });
     if (!user) {
@@ -203,6 +203,7 @@ app.get('/users/all', async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
+    console.log(res);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

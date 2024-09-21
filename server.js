@@ -186,6 +186,7 @@ app.put('/updateuser', async (req, res) => {
 // Get a user by userId
 app.get('/users/:userId', async (req, res) => {
   const { userId } = req.params;
+  console.log('getbyuserid ',req);
   try {
     const user = await User.findOne({ userId });
     if (!user) {

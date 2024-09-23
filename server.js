@@ -144,7 +144,7 @@ const generateUserId = async (data) => {
   sequence.sequence += 1;
   await sequence.save();
 
-  return `${prefix}${String(sequence.sequence).padStart(6, '0')}`;
+  return `${String(sequence.sequence).padStart(6, '0')}`;
 };
 
 const User = mongoose.model('User', userSchema);

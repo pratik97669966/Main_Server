@@ -133,18 +133,18 @@ const userSchema = new mongoose.Schema({
 });
 
 // Function to generate a new userId
-const generateUserId = async (prefix) => {
-  const data = 'lastUser';
-  let sequence = await Sequence.findOne({ data });
+const generateUserId = async (data) => {
+  const prefix = 'lastUser';
+  let sequence = await Sequence.findOne({ prefix });
 
   if (!sequence) {
-    sequence = new Sequence({ data, sequence: 0 });
+    sequence = new Sequence({ prefix, sequence: 0 });
   }
 
   sequence.sequence += 1;
   await sequence.save();
 
-  return `${prefix}${String(sequence.sequence).padStart(6, '0')}`;
+  return `${data}${String(sequence.sequence).padStart(6, '0')}`;
 };
 
 const User = mongoose.model('User', userSchema);

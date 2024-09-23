@@ -133,7 +133,8 @@ const userSchema = new mongoose.Schema({
 });
 
 // Function to generate a new userId
-const generateUserId = async (prefix) => {
+const generateUserId = async (data) => {
+  const prefix = 'lastUser';
   let sequence = await Sequence.findOne({ prefix });
 
   if (!sequence) {
@@ -143,7 +144,7 @@ const generateUserId = async (prefix) => {
   sequence.sequence += 1;
   await sequence.save();
 
-  return `${prefix}${String(sequence.sequence).padStart(6, '0')}`; // Adjust padding as needed
+  return `${prefix}${String(sequence.sequence).padStart(6, '0')}`;
 };
 
 const User = mongoose.model('User', userSchema);

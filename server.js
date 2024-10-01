@@ -1,11 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const Sequence = require('./models/Sequence'); // Ensure this path is correct
 
 const app = express();
 const PORT = process.env.PORT || 3030;
-const MONGODB_URI = 'mongodb+srv://test:test@api.vyp94tn.mongodb.net/?retryWrites=true&w=majority&appName=API';
+const MONGODB_URI = 'mongodb+srv://gunjalpatilmisal:gunjalpatilmisal@cluster0.0oj7f.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
@@ -15,153 +14,22 @@ app.use(bodyParser.json());
 
 // Define the User schema and model
 const userSchema = new mongoose.Schema({
-  status: String,
-  token: String,
-  membershipPlan: String,
-  numberOfContacts: Number,
-  activationDate: String,
-  expiryDate: String,
-  userId: String,
-  name: String,
-  phone: String,
-  country: String,
-  state: String,
-  city: String,
-  profileCreatedFor: String,
-  profilePictureUrls: [String],
-  gender: String,
-  religion: String,
-  caste: String,
-  subCaste: String,
-  maritalStatus: String,
-  dateOfBirth: String,
-  age: String,
-  email: String,
-  password: String,
-  referByName: String,
-  aboutMe: String,
-  education: String,
-  educationDetails: String,
-  employedIn: String,
-  occupation: String,
-  occupationDetails: String,
-  annualIncome: String,
-  incomeType: String,
-  anyOtherSourceIncome: String,
-  workingHours: String,
-  workingLocationCity: String,
-  workingExperience: String,
-  workingExperienceDetails: String,
-  lookingFor: String,
-  partnerAgeRange: String,
-  partnerHeightRange: String,
-  partnerIncomeRange: String,
-  partnerComplexion: String,
-  partnerDiet: String,
-  expectedEducation: String,
-  partnerOccupation: String,
-  partnerReligion: String,
-  partnerCaste: String,
-  partnerSubCaste: String,
-  readyToMarryInSameCaste: String,
-  partnerCountryLivingIn: String,
-  partnerState: String,
-  preferredWorkingCities: String,
-  preferredNativeCities: String,
-  partnerExpectations: String,
-  familyValues: String,
-  familyType: String,
-  familyStatus: String,
-  motherTongue: String,
-  numberOfBrothers: String,
-  numberOfSisters: String,
-  numberOfBrothersMarried: String,
-  numberOfSistersMarried: String,
-  fatherName: String,
-  fatherOccupation: String,
-  fatherAlive: String,
-  motherName: String,
-  motherOccupation: String,
-  motherAlive: String,
-  parentsStay: String,
-  nativeCountry: String,
-  nativeState: String,
-  nativeDistrict: String,
-  nativeCity: String,
-  currentCountry: String,
-  currentState: String,
-  currentDistrict: String,
-  currentCity: String,
-  mamaName: String,
-  mamaCity: String,
-  familyWealth: String,
-  familyWealthDetails: String,
-  surnamesOfRelatives: String,
-  aboutFamily: String,
-  address: String,
-  contactCountry: String,
-  contactState: String,
-  contactDistrict: String,
-  contactCity: String,
-  alternatePhone: String,
-  mobile: String,
-  whatsappNo: String,
-  height: String,
-  weight: Number,
-  bloodGroup: String,
-  complexion: String,
-  bodyType: String,
-  diet: String,
-  anyAchievement: String,
-  specialCases: String,
-  doYouHavePassport: String,
-  cardType: String,
-  moonsign: String,
-  star: String,
-  gotra: String,
-  devak: String,
-  manglik: String,
-  shani: String,
-  gan: String,
-  nadi: String,
-  charan: String,
-  horoscopeMatch: String,
-  placeOfBirth: String,
-  birthCountry: String,
-  timeOfBirth: String,
-  hobbies: String,
-  interests: String
+  phone: { type: String, unique: true, required: true },
 });
-
-// Function to generate a new userId
-const generateUserId = async (data) => {
-  const prefix = 'lastUser';
-  let sequence = await Sequence.findOne({ prefix });
-
-  if (!sequence) {
-    sequence = new Sequence({ prefix, sequence: 0 });
-  }
-
-  sequence.sequence += 1;
-  await sequence.save();
-
-  return `${data}${String(sequence.sequence)}`;
-};
 
 const User = mongoose.model('User', userSchema);
 
 // Create a new user
 app.post('/createnewuser', async (req, res) => {
   try {
-    const { prefix, ...userData } = req.body;
+    const userData = req.body;
+    const { phone } = userData;
 
-    if (!prefix) {
-      return res.status(400).json({ message: 'Prefix is required' });
+    if (!phone) {
+      return res.status(400).json({ message: 'Phone number is required' });
     }
 
-    const userId = await generateUserId(prefix);
-
-    const user = new User({ ...userData, userId });
+    const user = new User(userData);
     await user.save();
 
     res.status(200).json(user);
@@ -173,9 +41,9 @@ app.post('/createnewuser', async (req, res) => {
 // Update a user
 app.put('/updateuser', async (req, res) => {
   const userData = req.body;
-  const { userId } = userData;
+  const { phone } = userData;
   try {
-    const user = await User.findOneAndUpdate({ userId }, userData, { new: true });
+    const user = await User.findOneAndUpdate({ phone }, userData, { new: true });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -185,11 +53,11 @@ app.put('/updateuser', async (req, res) => {
   }
 });
 
-// Get a user by userId
-app.get('/users/:userId', async (req, res) => {
-  const { userId } = req.params;
+// Get a user by phone number
+app.get('/users/:phone', async (req, res) => {
+  const { phone } = req.params;
   try {
-    const user = await User.findOne({ userId });
+    const user = await User.findOne({ phone });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -204,17 +72,16 @@ app.get('/getallusers', async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
-    console.log(res);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// Delete a user
-app.delete('/users/:userId', async (req, res) => {
-  const { userId } = req.params;
+// Delete a user by phone number
+app.delete('/users/:phone', async (req, res) => {
+  const { phone } = req.params;
   try {
-    const user = await User.findOneAndDelete({ userId });
+    const user = await User.findOneAndDelete({ phone });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

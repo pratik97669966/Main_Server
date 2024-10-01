@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 const app = express();
-const PORT = process.env.PORT || 3030;
+const PORT = process.env.PORT || 3000;
 const MONGODB_URI = 'mongodb+srv://gunjalpatilmisal:gunjalpatilmisal@cluster0.0oj7f.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -17,15 +17,15 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, unique: true, required: true },
   firtName: String,
   lastName: String,
-  dateOfBirth: any,
+  dateOfBirth: String,
   address: String,
   landmark: String,
-  comboPack: any,
+  comboPack: String,
   paymentStatus: String,
   amount: String,
   transactionId: String,
   transactionStatus: String,
-  note:String,
+  note: String,
 });
 
 const User = mongoose.model('User', userSchema);
@@ -68,7 +68,7 @@ app.put('/updateuser', async (req, res) => {
 app.get('/users/:phone', async (req, res) => {
   const { phone } = req.params;
   try {
-    const user = await User.findOne({ phone });
+    const user = await User.find({ phone });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

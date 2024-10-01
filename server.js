@@ -15,6 +15,17 @@ app.use(bodyParser.json());
 // Define the User schema and model
 const userSchema = new mongoose.Schema({
   phone: { type: String, unique: true, required: true },
+  firtName: String,
+  lastName: String,
+  dateOfBirth: any,
+  address: String,
+  landmark: String,
+  comboPack: any,
+  paymentStatus: String,
+  amount: String,
+  transactionId: String,
+  transactionStatus: String,
+  note:String,
 });
 
 const User = mongoose.model('User', userSchema);

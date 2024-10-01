@@ -16,6 +16,7 @@ app.use(bodyParser.json());
 // Define the User schema and model
 const userSchema = new mongoose.Schema({
   status: String,
+  token: String,
   membershipPlan: String,
   numberOfContacts: Number,
   activationDate: String,

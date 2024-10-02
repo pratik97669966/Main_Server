@@ -47,9 +47,9 @@ const loginUserSchema = new mongoose.Schema({
 
 const productSchema = new mongoose.Schema({
   name: String,
-  price: number,
-  quantity: number,
-  minQuantity: number
+  price: Number,
+  quantity: Number,
+  minQuantity: Number
 });
 
 const User = mongoose.model('User', userSchema);

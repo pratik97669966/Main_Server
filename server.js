@@ -46,18 +46,10 @@ const loginUserSchema = new mongoose.Schema({
 });
 
 const productSchema = new mongoose.Schema({
-  phone: { type: String, required: true },
-  firtName: String,
-  lastName: String,
-  dateOfBirth: String,
-  address: String,
-  landmark: String,
-  comboPack: String,
-  paymentStatus: String,
-  amount: String,
-  transactionId: String,
-  transactionStatus: String,
-  note: String,
+  name: String,
+  price: number,
+  quantity: number,
+  minQuantity: number
 });
 
 const User = mongoose.model('User', userSchema);
@@ -157,6 +149,15 @@ app.get('/getallusers', async (req, res) => {
 app.get('/getallloginusers', async (req, res) => {
   try {
     const users = await LoginUser.find();
+    res.json(users);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+// Get all login users
+app.get('/getallproducts', async (req, res) => {
+  try {
+    const users = await Product.find();
     res.json(users);
   } catch (error) {
     res.status(400).json({ error: error.message });

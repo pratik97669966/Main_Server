@@ -47,6 +47,7 @@ const loginUserSchema = new mongoose.Schema({
 
 const productSchema = new mongoose.Schema({
   productName: { type: String, required: true },
+  combopack: Number,
   price: Number,
   quantity: Number,
   minQuantity: Number
@@ -155,15 +156,18 @@ app.get('/getallloginusers', async (req, res) => {
   }
 });
 
-// Get all products
-app.get('/getallproducts', async (req, res) => {
+// Get all products by combopack
+app.get('/getallproducts/:combopack', async (req, res) => {
+  const { combopack } = req.params; // Use req.query to access query parameters
   try {
-    const products = await Product.find();
+    const query = combopack ? { combopack } : {}; // Create a query object
+    const products = await Product.find(query); // Use the query object to find products
     res.json(products);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
+
 
 // Delete a user by phone number
 app.delete('/users/:phone', async (req, res) => {

@@ -46,7 +46,7 @@ const loginUserSchema = new mongoose.Schema({
 });
 
 const productSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  productName: { type: String, required: true },
   price: Number,
   quantity: Number,
   minQuantity: Number
@@ -54,7 +54,7 @@ const productSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 const LoginUser = mongoose.model('LoginUser', loginUserSchema);
-const Product = mongoose.model('Product', productSchema);
+const Product = mongoose.model('newProducts', productSchema);
 
 // Create a new login user
 app.post('/createloginuser', async (req, res) => {
@@ -76,7 +76,7 @@ app.post('/createloginuser', async (req, res) => {
 });
 
 // Add a new product
-app.post('/addproduct', async (req, res) => {
+app.post('/createproduct', async (req, res) => {
   try {
     const productData = req.body;
     const data = new Product(productData);

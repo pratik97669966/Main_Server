@@ -22,7 +22,7 @@ app.use(cors(corsOptions)); // Use the CORS options
 
 // Define the User schema and model
 const userSchema = new mongoose.Schema({
-  phone: { type: String, unique: true, required: true },
+  phone: { type: String, required: true },
   firtName: String,
   lastName: String,
   dateOfBirth: String,
@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
 });
 
 const loginUserSchema = new mongoose.Schema({
-  phone: { type: String, unique: true, required: true },
+  phone: { type: String, required: true },
   firtName: String,
   lastName: String,
   dateOfBirth: String,
@@ -46,7 +46,7 @@ const loginUserSchema = new mongoose.Schema({
 });
 
 const productSchema = new mongoose.Schema({
-  phone: { type: String, unique: true, required: true },
+  phone: { type: String, required: true },
   firtName: String,
   lastName: String,
   dateOfBirth: String,

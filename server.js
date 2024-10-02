@@ -46,7 +46,7 @@ const loginUserSchema = new mongoose.Schema({
 });
 
 const productSchema = new mongoose.Schema({
-  name: String,
+  name: { type: String, required: true },
   price: Number,
   quantity: Number,
   minQuantity: Number
@@ -54,7 +54,7 @@ const productSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 const LoginUser = mongoose.model('LoginUser', loginUserSchema);
-const Product = mongoose.model('Products', productSchema);
+const Product = mongoose.model('Product', productSchema);
 
 // Create a new login user
 app.post('/createloginuser', async (req, res) => {
@@ -100,7 +100,7 @@ app.post('/createnewuser', async (req, res) => {
     const user = new User(userData);
     await user.save();
 
-    res.status(200).json(user);
+    res.status(201).json(user);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -154,11 +154,12 @@ app.get('/getallloginusers', async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-// Get all login users
+
+// Get all products
 app.get('/getallproducts', async (req, res) => {
   try {
-    const users = await Product.find();
-    res.json(users);
+    const products = await Product.find();
+    res.json(products);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

@@ -216,12 +216,14 @@ app.get('/getbygender/:gender', async (req, res) => {
   const { gender } = req.params;
 
   try {
-    const users = await User.find(gender);
+    // Make sure to create a filter object for the find method
+    const users = await User.find({ gender }); // Assumes your User model has a 'gender' field
     res.json(users);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
+
 
 // Delete a user
 app.delete('/users/:userId', async (req, res) => {

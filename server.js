@@ -201,10 +201,23 @@ app.get('/users/:userId', async (req, res) => {
 
 // Get all users
 app.get('/getallusers', async (req, res) => {
+  const { userId } = req.params;
+
   try {
     const users = await User.find();
     res.json(users);
-    console.log(res);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Get all users
+app.get('/getbygender/:gender', async (req, res) => {
+  const { gender } = req.params;
+
+  try {
+    const users = await User.find(gender);
+    res.json(users);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

@@ -188,12 +188,15 @@ app.post('/createnewuser', async (req, res) => {
   }
 });
 
-// Update a user
 app.put('/updateuser', async (req, res) => {
   const userData = req.body;
   const { userId } = userData;
   try {
-    const user = await User.findOneAndUpdate({ userId }, userData, { new: true });
+    const user = await User.findOneAndUpdate(
+      { userId },
+      { $set: userData },
+      { new: true, upsert: true } // upsert: true will create the document if it doesn't exist
+    );
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

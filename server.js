@@ -11,10 +11,14 @@ app.use(cors());
 app.use(express.json());
 
 // Define your proxy endpoint
-app.get('/data', async (req, res) => {
+app.post('/data', async (req, res) => {
     try {
-        const response = await axios.get('https://script.google.com/macros/s/AKfycbwcWqDV-pNAoBQkeUWPXQUrq6BdORvr5zeoiBz4lZurHnooOn_POC6HFloYk4p5p6_W/exec');
-        res.json(response.data);
+        const response = await axios.post('https://script.google.com/macros/s/AKfycbwcWqDV-pNAoBQkeUWPXQUrq6BdORvr5zeoiBz4lZurHnooOn_POC6HFloYk4p5p6_W/exec', req.body, {
+          headers: {
+              'Content-Type': 'application/json'
+          }
+      });
+      res.json(response.data);
     } catch (error) {
         console.error('Error fetching data from Google Apps Script:', error);
         res.status(500).send('Error fetching data');

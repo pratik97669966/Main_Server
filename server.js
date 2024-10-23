@@ -5,7 +5,7 @@ const Sequence = require('./models/Sequence'); // Ensure this path is correct
 
 const app = express();
 const PORT = process.env.PORT || 3030;
-const MONGODB_URI = 'mongodb+srv://test:test@api.vyp94tn.mongodb.net/?retryWrites=true&w=majority&appName=API';
+const MONGODB_URI = 'mongodb+srv://sandipshelke203:sandipshelke203@data.l6eak.mongodb.net/?retryWrites=true&w=majority&appName=Data';
 
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('MongoDB connected'))

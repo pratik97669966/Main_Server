@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcWqDV-pNAoBQkeUWPXQUrq6BdORvr5zeoiBz4lZurHnooOn_POC6HFloYk4p5p6_W/exec';
+const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyy_EoIM7d0x5zK3ZH45oC_u9F_5T8tsqf7aCzGCcacZl9d0Kftg4Hjg6h4Flyl0Xxp/exec';
 
 // Define your proxy endpoint for POST (Add Entry)
 app.post('/data', async (req, res) => {

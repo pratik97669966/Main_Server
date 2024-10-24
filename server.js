@@ -107,7 +107,9 @@ const userSchema = new mongoose.Schema({
     familyWealthDetails: String,
     surnamesOfRelatives: String,
     aboutFamily: String,
-
+    numberOfChildrenGirl: String,
+    numberOfChildrenBoy: String,
+    childrenLivingStatus: String,
     // Contact Information
     address: String,
     contactCountry: String,

@@ -60,7 +60,7 @@ app.put('/data/:id', async (req, res) => {
         res.json(response.data);
     } catch (error) {
         console.error('Error updating data in Google Apps Script:', error);
-        res.status(500).send('Error updating data');
+        res.status(500).send('Error updating data' + error);
     }
 });
 

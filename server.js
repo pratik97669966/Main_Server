@@ -246,14 +246,24 @@ app.get('/getbygender/:gender', async (req, res) => {
 
     try {
         const users = await User.aggregate([
-            { $match: { gender } }, // Filter by gender
-            { $sample: { size: 50 } } // Select 50 random users
+            {
+                $match: {
+                    gender,
+                    membershipPlan: "Paid"
+                }
+            }, // Filter by gender and membership plan
+            {
+                $sample: {
+                    size: 50
+                }
+            } // Select 50 random users
         ]);
         res.json(users);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
+
 
 
 

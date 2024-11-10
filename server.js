@@ -241,17 +241,20 @@ app.get('/getallusers', async (req, res) => {
     }
 });
 
-// Get all users
 app.get('/getbygender/:gender', async (req, res) => {
     const { gender } = req.params;
 
     try {
-        const users = await User.find({ gender });
+        const users = await User.aggregate([
+            { $match: { gender } }, // Filter by gender
+            { $sample: { size: 50 } } // Select 50 random users
+        ]);
         res.json(users);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
+
 
 
 // Delete a user

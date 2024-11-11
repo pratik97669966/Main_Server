@@ -1,7 +1,7 @@
 {
-  "name": "your-project-name",
+  "name": "pratik-pansare",
   "version": "1.0.0",
-  "description": "Your project description",
+  "description": "pratik-pansare",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",

@@ -11,7 +11,7 @@ router.delete('/users/:userId', userController.deleteUser);
 
 router.post('/viewProfile', userController.viewProfile);
 router.post('/showInterest', userController.showInterest);
-// router.get('/getPendingRequests/:userId', userController.getPendingRequests);
+router.get('/getMyViewedProfile/:userId', userController.getMyViewedProfile);
 router.post('/blockUser', userController.blockUser);
 router.get('/getBlockedUsers/:userId', userController.getBlockedUsers); // Single definition
 router.get('/getWhoViewedProfile/:userId', userController.getWhoViewedProfile);

@@ -1,13 +1,12 @@
-// models/Block.js
 const mongoose = require('mongoose');
 
 const BlockSchema = new mongoose.Schema({
-    blockerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // The user who is blocking
-    blockedUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // The user being blocked
-    blockedAt: { type: Date, default: Date.now }
+    blockerId: { type: String, required: true },
+    blockedUserId: { type: String, required: true },
+    date: { type: Date, default: Date.now }
 });
 
-// Add a compound index to prevent duplicate blocks by the same user
-BlockSchema.index({ blockerId: 1, blockedUserId: 1 }, { unique: true });
+// Index to speed up blocked user counts
+BlockSchema.index({ blockerId: 1, blockedUserId: 1 });
 
 module.exports = mongoose.model('Block', BlockSchema);

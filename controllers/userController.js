@@ -33,12 +33,22 @@ exports.showInterest = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
+// Get Who Viewed My Profile
+exports.getMyViewedProfile = async (req, res) => {
+    const { userId } = req.params;
+    console.log('getMyViewedProfile', userId);
+    try {
+        const views = await ProfileView.find({ viewerId: userId });
+        res.status(200).json(views);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 // Get Who Viewed My Profile
 exports.getWhoViewedProfile = async (req, res) => {
     const { userId } = req.params;
     try {
-        const views = await ProfileView.find({ viewedUserId: userId }).populate('viewerId', 'name');
+        const views = await ProfileView.find({ viewedUserId: userId });
         res.status(200).json(views);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -49,7 +59,7 @@ exports.getWhoViewedProfile = async (req, res) => {
 exports.getInterestsShownToMe = async (req, res) => {
     const { userId } = req.params;
     try {
-        const interests = await Interest.find({ targetUserId: userId }).populate('interestedUserId', 'name');
+        const interests = await Interest.find({ targetUserId: userId });
         res.status(200).json(interests);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -59,12 +69,14 @@ exports.getInterestsShownToMe = async (req, res) => {
 // Get Counts for Specific Data Points
 exports.getCounts = async (req, res) => {
     const { userId } = req.params;
+
     try {
+        // Use Promise.all to perform all queries concurrently
         const [profileViewsCount, interestsReceivedCount, interestsSentCount, blockedCount] = await Promise.all([
-            ProfileView.countDocuments({ viewedUserId: userId }),
-            Interest.countDocuments({ targetUserId: userId, status: 'Pending' }),
-            Interest.countDocuments({ interestedUserId: userId, status: 'Pending' }),
-            Block.countDocuments({ blockerId: userId })
+            ProfileView.countDocuments({ viewerId: userId }), // Count of profiles viewed by this user
+            Interest.countDocuments({ targetUserId: userId }), // Count of interests received
+            Interest.countDocuments({ interestedUserId: userId }), // Count of interests made
+            Block.countDocuments({ blockerId: userId }) // Count of users blocked by this user
         ]);
 
         res.status(200).json({
@@ -77,6 +89,7 @@ exports.getCounts = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // Block a User
 exports.blockUser = async (req, res) => {
@@ -103,7 +116,7 @@ exports.blockUser = async (req, res) => {
 exports.getBlockedUsers = async (req, res) => {
     const { userId } = req.params;
     try {
-        const blockedByMe = await Block.find({ blockerId: userId }).populate('blockedUserId', 'name');
+        const blockedByMe = await Block.find({ blockerId: userId });
         res.status(200).json(blockedByMe);
     } catch (error) {
         res.status(500).json({ error: error.message });

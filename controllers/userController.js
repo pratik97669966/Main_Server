@@ -1,6 +1,126 @@
 const Sequence = require('../models/Sequence.js');
 const User = require('../models/User');
+const ProfileView = require('../models/ProfileView');
+const Interest = require('../models/Interest');
+const Block = require('../models/Block');
 
+// Record or Update Profile View with Latest Date
+exports.viewProfile = async (req, res) => {
+    const { viewerId, viewedUserId } = req.body;
+    try {
+        const view = await ProfileView.findOneAndUpdate(
+            { viewerId, viewedUserId },
+            { date: new Date() }, // Update date to current date
+            { new: true, upsert: true } // Create new if not exists
+        );
+        res.status(200).json({ view });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Record or Update Interest with Latest Date
+exports.showInterest = async (req, res) => {
+    const { interestedUserId, targetUserId } = req.body;
+    try {
+        const interest = await Interest.findOneAndUpdate(
+            { interestedUserId, targetUserId },
+            { date: new Date() },
+            { new: true, upsert: true }
+        );
+        res.status(200).json({ message: 'Interest recorded or updated successfully', interest });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Get Who Viewed My Profile
+exports.getWhoViewedProfile = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const views = await ProfileView.find({ viewedUserId: userId }).populate('viewerId', 'name');
+        res.status(200).json(views);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Get Interests Shown to Me
+exports.getInterestsShownToMe = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const interests = await Interest.find({ targetUserId: userId }).populate('interestedUserId', 'name');
+        res.status(200).json(interests);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Get Counts for Specific Data Points
+exports.getCounts = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const [profileViewsCount, interestsReceivedCount, interestsSentCount, blockedCount] = await Promise.all([
+            ProfileView.countDocuments({ viewedUserId: userId }),
+            Interest.countDocuments({ targetUserId: userId, status: 'Pending' }),
+            Interest.countDocuments({ interestedUserId: userId, status: 'Pending' }),
+            Block.countDocuments({ blockerId: userId })
+        ]);
+
+        res.status(200).json({
+            profileViewsCount,
+            interestsReceivedCount,
+            interestsSentCount,
+            blockedCount
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Block a User
+exports.blockUser = async (req, res) => {
+    const { userId, blockedUserId } = req.body;
+    if (!userId || !blockedUserId) {
+        return res.status(400).json({ message: 'Both userId and blockedUserId are required' });
+    }
+    try {
+        const existingBlock = await Block.findOne({ blockerId: userId, blockedUserId });
+        if (existingBlock) {
+            return res.status(400).json({ message: 'User is already blocked' });
+        }
+
+        const block = new Block({ blockerId: userId, blockedUserId });
+        await block.save();
+
+        res.status(200).json({ message: 'User blocked successfully', block });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Get List of Blocked Users
+exports.getBlockedUsers = async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const blockedByMe = await Block.find({ blockerId: userId }).populate('blockedUserId', 'name');
+        res.status(200).json(blockedByMe);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Get list of blocked users for a specific user
+exports.getBlockedUsers = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const blockedByMe = await Block.find({ blockerId: userId }).populate('blockedUserId', 'name');
+        res.status(200).json(blockedByMe);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 // Function to generate a unique user ID
 const generateUserId = async (prefix) => {
     let sequence = await Sequence.findOne({ prefix });

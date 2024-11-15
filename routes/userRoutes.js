@@ -8,9 +8,10 @@ router.get('/users/:userId', userController.getUserById);
 router.get('/getallusers', userController.getAllUsers);
 router.get('/getbygender/:gender', userController.getUsersByGender);
 router.delete('/users/:userId', userController.deleteUser);
+
 router.post('/viewProfile', userController.viewProfile);
 router.post('/showInterest', userController.showInterest);
-router.get('/getPendingRequests/:userId', userController.getPendingRequests);
+// router.get('/getPendingRequests/:userId', userController.getPendingRequests);
 router.post('/blockUser', userController.blockUser);
 router.get('/getBlockedUsers/:userId', userController.getBlockedUsers); // Single definition
 router.get('/getWhoViewedProfile/:userId', userController.getWhoViewedProfile);

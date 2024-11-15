@@ -12,9 +12,9 @@ router.post('/viewProfile', userController.viewProfile);
 router.post('/showInterest', userController.showInterest);
 router.get('/getPendingRequests/:userId', userController.getPendingRequests);
 router.post('/blockUser', userController.blockUser);
-router.get('/getBlockedUsers/:userId', userController.getBlockedUsers);
+router.get('/getBlockedUsers/:userId', userController.getBlockedUsers); // Single definition
 router.get('/getWhoViewedProfile/:userId', userController.getWhoViewedProfile);
 router.get('/getInterestsShownToMe/:userId', userController.getInterestsShownToMe);
 router.get('/getCounts/:userId', userController.getCounts);
-router.get('/getBlockedUsers/:userId', userController.getBlockedUsers);
+
 module.exports = router;

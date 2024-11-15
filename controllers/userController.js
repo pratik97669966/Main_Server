@@ -1,4 +1,4 @@
-const Sequence = require('../models/Sequence.js');
+const Sequence = require('../models/Sequence');
 const User = require('../models/User');
 const ProfileView = require('../models/ProfileView');
 const Interest = require('../models/Interest');
@@ -10,8 +10,8 @@ exports.viewProfile = async (req, res) => {
     try {
         const view = await ProfileView.findOneAndUpdate(
             { viewerId, viewedUserId },
-            { date: new Date() }, // Update date to current date
-            { new: true, upsert: true } // Create new if not exists
+            { date: new Date() },
+            { new: true, upsert: true }
         );
         res.status(200).json({ view });
     } catch (error) {
@@ -110,17 +110,6 @@ exports.getBlockedUsers = async (req, res) => {
     }
 };
 
-// Get list of blocked users for a specific user
-exports.getBlockedUsers = async (req, res) => {
-    const { userId } = req.params;
-
-    try {
-        const blockedByMe = await Block.find({ blockerId: userId }).populate('blockedUserId', 'name');
-        res.status(200).json(blockedByMe);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
 // Function to generate a unique user ID
 const generateUserId = async (prefix) => {
     let sequence = await Sequence.findOne({ prefix });
@@ -168,7 +157,7 @@ exports.updateUser = async (req, res) => {
         const user = await User.findOneAndUpdate(
             { userId },
             { $set: userData },
-            { new: true, upsert: false } // upsert: false to avoid creating new document
+            { new: true, upsert: false }
         );
 
         if (!user) {
@@ -205,22 +194,17 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
-// Get users by gender with specific membership plan and random sampling
+// Get users by gender
 exports.getUsersByGender = async (req, res) => {
     const { gender } = req.params;
 
     try {
         const users = await User.aggregate([
             {
-                $match: {
-                    gender,
-                    membershipPlan: "Paid",
-                },
+                $match: { gender, membershipPlan: "Paid" }
             },
             {
-                $sample: {
-                    size: 50,
-                },
+                $sample: { size: 50 }
             },
         ]);
         res.json(users);

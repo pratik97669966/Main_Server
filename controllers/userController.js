@@ -44,12 +44,66 @@ exports.getMyViewedProfile = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+// Get List of Profiles I have Viewed with Pagination
+exports.getMyViewedProfiles = async (req, res) => {
+    const { userId } = req.params;
+    const { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+    const skip = (page - 1) * limit; // Calculate the number of records to skip
+
+    try {
+        const views = await ProfileView.find({ viewerId: userId })
+            .skip(skip) // Skip the records based on page
+            .limit(parseInt(limit)) // Limit to the number of records per page
+            .exec();
+
+        // Manually populate user data for the viewed profiles
+        const populatedViews = await Promise.all(views.map(async (view) => {
+            const viewedUser = await User.findOne({ userId: view.viewedUserId });
+            return {
+                ...view.toObject(),
+                viewedUser: viewedUser ? { userId: viewedUser.userId, name: viewedUser.name, email: viewedUser.email, profilePicture: viewedUser.profilePicture } : null
+            };
+        }));
+
+        res.status(200).json(populatedViews);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 // Get Who Viewed My Profile
 exports.getWhoViewedProfile = async (req, res) => {
     const { userId } = req.params;
     try {
         const views = await ProfileView.find({ viewedUserId: userId });
         res.status(200).json(views);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// Get List of Users Who Viewed My Profile with Pagination
+exports.getWhoViewedProfile = async (req, res) => {
+    const { userId } = req.params;
+    const { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+    const skip = (page - 1) * limit; // Calculate the number of records to skip
+
+    try {
+        const views = await ProfileView.find({ viewedUserId: userId })
+            .skip(skip) // Skip the records based on page
+            .limit(parseInt(limit)) // Limit to the number of records per page
+            .exec();
+
+        // Manually populate user data for the viewed profiles
+        const populatedViews = await Promise.all(views.map(async (view) => {
+            const viewedUser = await User.findOne({ userId: view.viewedUserId });
+            return {
+                ...view.toObject(),
+                viewedUser: viewedUser ? { userId: viewedUser.userId, name: viewedUser.name, email: viewedUser.email, profilePicture: viewedUser.profilePicture } : null
+            };
+        }));
+
+        res.status(200).json(populatedViews);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -72,15 +126,17 @@ exports.getCounts = async (req, res) => {
 
     try {
         // Use Promise.all to perform all queries concurrently
-        const [profileViewsCount, interestsReceivedCount, interestsSentCount, blockedCount] = await Promise.all([
+        const [myProfileViewsCount, otherProfileViewsCount, interestsReceivedCount, interestsSentCount, blockedCount] = await Promise.all([
             ProfileView.countDocuments({ viewerId: userId }), // Count of profiles viewed by this user
+            ProfileView.countDocuments({ viewedUserId: userId }), // Count of profiles viewed by Other user
             Interest.countDocuments({ targetUserId: userId }), // Count of interests received
             Interest.countDocuments({ interestedUserId: userId }), // Count of interests made
             Block.countDocuments({ blockerId: userId }) // Count of users blocked by this user
         ]);
 
         res.status(200).json({
-            profileViewsCount,
+            myProfileViewsCount,
+            otherProfileViewsCount,
             interestsReceivedCount,
             interestsSentCount,
             blockedCount

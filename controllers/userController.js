@@ -70,14 +70,7 @@ exports.getMyViewedProfiles = async (req, res) => {
         const userCountList = await Promise.all(
             views.map(async (view) => {
                 const viewedUser = await User.findOne({ userId: view.viewedUserId });
-                return viewedUser
-                    ? {
-                        userId: viewedUser.userId,
-                        name: viewedUser.name,
-                        email: viewedUser.email,
-                        profilePicture: viewedUser.profilePicture,
-                    }
-                    : null;
+                return viewedUser;
             })
         );
 

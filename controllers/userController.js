@@ -47,7 +47,7 @@ exports.showInterest = async (req, res) => {
 // Get List of Profiles I have Viewed with Pagination
 exports.getMyViewedProfiles = async (req, res) => {
     const { userId } = req.params;
-    let { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+    let { page = 1, limit = 10 } = req.query;
 
     // Ensure `page` and `limit` are positive integers
     page = Math.max(parseInt(page, 10), 1);
@@ -56,31 +56,33 @@ exports.getMyViewedProfiles = async (req, res) => {
     const skip = (page - 1) * limit;
 
     try {
-        console.log({ userId, page, limit, skip });
-
         // Total count of views to calculate total pages
         const totalViews = await ProfileView.countDocuments({ viewerId: userId });
-        console.log({ totalViews });
 
-        // Fetch the paginated views
+        // Fetch the paginated views sorted by date in descending order
         const views = await ProfileView.find({ viewerId: userId })
+            .sort({ date: -1 }) // Sort by date descending
             .skip(skip)
             .limit(limit)
             .exec();
-        console.log({ views });
 
         // Populate user data for the viewed profiles
         const userCountList = await Promise.all(
             views.map(async (view) => {
                 const viewedUser = await User.findOne({ userId: view.viewedUserId });
-                console.log({ view, viewedUser });
-                return viewedUser;
+                return viewedUser
+                    ? {
+                        userId: viewedUser.userId,
+                        name: viewedUser.name,
+                        email: viewedUser.email,
+                        profilePicture: viewedUser.profilePicture,
+                    }
+                    : null;
             })
         );
 
         // Filter out any null values in case some user data is missing
         const filteredUserCountList = userCountList.filter((user) => user !== null);
-        console.log({ filteredUserCountList });
 
         // Construct the response
         const response = {
@@ -91,10 +93,8 @@ exports.getMyViewedProfiles = async (req, res) => {
             userCountList: filteredUserCountList,
         };
 
-        console.log("Response:", JSON.stringify(response, null, 2));
         res.status(200).json(response);
     } catch (error) {
-        console.error("Error:", error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -119,6 +119,7 @@ exports.getWhoViewedProfile = async (req, res) => {
 
         // Fetch the paginated views
         const views = await ProfileView.find({ viewedUserId: userId })
+            .sort({ date: -1 }) // Sort by date descending
             .skip(skip)
             .limit(limit)
             .exec();

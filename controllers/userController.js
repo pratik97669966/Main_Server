@@ -34,50 +34,67 @@ exports.showInterest = async (req, res) => {
     }
 };
 // Get Who Viewed My Profile
-exports.getMyViewedProfile = async (req, res) => {
-    const { userId } = req.params;
-    console.log('getMyViewedProfile', userId);
-    try {
-        const views = await ProfileView.find({ viewerId: userId });
-        res.status(200).json(views);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+// exports.getMyViewedProfile = async (req, res) => {
+//     const { userId } = req.params;
+//     console.log('getMyViewedProfile', userId);
+//     try {
+//         const views = await ProfileView.find({ viewerId: userId });
+//         res.status(200).json(views);
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     }
+// };
 // Get List of Profiles I have Viewed with Pagination
 exports.getMyViewedProfiles = async (req, res) => {
     const { userId } = req.params;
-    const { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
-    const skip = (page - 1) * limit; // Calculate the number of records to skip
+    let { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+
+    // Ensure `page` and `limit` are positive integers
+    page = Math.max(parseInt(page, 10), 1);
+    limit = Math.max(parseInt(limit, 10), 1);
+
+    const skip = (page - 1) * limit;
 
     try {
+        console.log({ userId, page, limit, skip });
+
+        // Total count of views to calculate total pages
+        const totalViews = await ProfileView.countDocuments({ viewerId: userId });
+        console.log({ totalViews });
+
+        // Fetch the paginated views
         const views = await ProfileView.find({ viewerId: userId })
-            .skip(skip) // Skip the records based on page
-            .limit(parseInt(limit)) // Limit to the number of records per page
+            .skip(skip)
+            .limit(limit)
             .exec();
+        console.log({ views });
 
-        // Manually populate user data for the viewed profiles
-        const populatedViews = await Promise.all(views.map(async (view) => {
-            const viewedUser = await User.findOne({ userId: view.viewedUserId });
-            return {
-                ...view.toObject(),
-                viewedUser: viewedUser ? { userId: viewedUser.userId, name: viewedUser.name, email: viewedUser.email, profilePicture: viewedUser.profilePicture } : null
-            };
-        }));
+        // Populate user data for the viewed profiles
+        const userCountList = await Promise.all(
+            views.map(async (view) => {
+                const viewedUser = await User.findOne({ userId: view.viewedUserId });
+                console.log({ view, viewedUser });
+                return viewedUser;
+            })
+        );
 
-        res.status(200).json(populatedViews);
+        // Filter out any null values in case some user data is missing
+        const filteredUserCountList = userCountList.filter((user) => user !== null);
+        console.log({ filteredUserCountList });
+
+        // Construct the response
+        const response = {
+            page: {
+                totalPages: Math.ceil(totalViews / limit),
+                currentPage: page,
+            },
+            userCountList: filteredUserCountList,
+        };
+
+        console.log("Response:", JSON.stringify(response, null, 2));
+        res.status(200).json(response);
     } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-// Get Who Viewed My Profile
-exports.getWhoViewedProfile = async (req, res) => {
-    const { userId } = req.params;
-    try {
-        const views = await ProfileView.find({ viewedUserId: userId });
-        res.status(200).json(views);
-    } catch (error) {
+        console.error("Error:", error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -85,26 +102,54 @@ exports.getWhoViewedProfile = async (req, res) => {
 // Get List of Users Who Viewed My Profile with Pagination
 exports.getWhoViewedProfile = async (req, res) => {
     const { userId } = req.params;
-    const { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
-    const skip = (page - 1) * limit; // Calculate the number of records to skip
+    let { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+
+    // Ensure `page` and `limit` are positive integers
+    page = Math.max(parseInt(page, 10), 1);
+    limit = Math.max(parseInt(limit, 10), 1);
+
+    const skip = (page - 1) * limit;
 
     try {
+        console.log({ userId, page, limit, skip });
+
+        // Total count of views to calculate total pages
+        const totalViews = await ProfileView.countDocuments({ viewedUserId: userId });
+        console.log({ totalViews });
+
+        // Fetch the paginated views
         const views = await ProfileView.find({ viewedUserId: userId })
-            .skip(skip) // Skip the records based on page
-            .limit(parseInt(limit)) // Limit to the number of records per page
+            .skip(skip)
+            .limit(limit)
             .exec();
+        console.log({ views });
 
-        // Manually populate user data for the viewed profiles
-        const populatedViews = await Promise.all(views.map(async (view) => {
-            const viewedUser = await User.findOne({ userId: view.viewedUserId });
-            return {
-                ...view.toObject(),
-                viewedUser: viewedUser ? { userId: viewedUser.userId, name: viewedUser.name, email: viewedUser.email, profilePicture: viewedUser.profilePicture } : null
-            };
-        }));
+        // Populate user data for the viewed profiles
+        const userCountList = await Promise.all(
+            views.map(async (view) => {
+                const viewedUser = await User.findOne({ userId: view.viewerId });
+                console.log({ view, viewedUser });
+                return viewedUser;
+            })
+        );
 
-        res.status(200).json(populatedViews);
+        // Filter out any null values in case some user data is missing
+        const filteredUserCountList = userCountList.filter((user) => user !== null);
+        console.log({ filteredUserCountList });
+
+        // Construct the response
+        const response = {
+            page: {
+                totalPages: Math.ceil(totalViews / limit),
+                currentPage: page,
+            },
+            userCountList: filteredUserCountList,
+        };
+
+        console.log("Response:", JSON.stringify(response, null, 2));
+        res.status(200).json(response);
     } catch (error) {
+        console.error("Error:", error);
         res.status(500).json({ error: error.message });
     }
 };

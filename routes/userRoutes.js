@@ -18,4 +18,8 @@ router.get('/getWhoViewedProfile/:userId', userController.getWhoViewedProfile);
 router.get('/getInterestsShownToMe/:userId', userController.getInterestsShownToMe);
 router.get('/getCounts/:userId', userController.getCounts);
 
+// My Contacts
+router.post('/myContacts', userController.myContacts);
+router.post('/getMyContactsProfiles', userController.getMyContactsProfiles);
+
 module.exports = router;

@@ -3,6 +3,7 @@ const User = require('../models/User');
 const ProfileView = require('../models/ProfileView');
 const Interest = require('../models/Interest');
 const Block = require('../models/Block');
+const MyContacts = require('../models/MyContacts');
 
 // Record or Update Profile View with Latest Date
 exports.viewProfile = async (req, res) => {
@@ -33,17 +34,20 @@ exports.showInterest = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-// Get Who Viewed My Profile
-// exports.getMyViewedProfile = async (req, res) => {
-//     const { userId } = req.params;
-//     console.log('getMyViewedProfile', userId);
-//     try {
-//         const views = await ProfileView.find({ viewerId: userId });
-//         res.status(200).json(views);
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// };
+// Record or Update My Contacts with Latest Date
+exports.myContacts = async (req, res) => {
+    const { myUserId, } = req.body;
+    try {
+        const contacts = await MyContacts.findOneAndUpdate(
+            { myUserId, contactUserId },
+            { date: new Date() },
+            { new: true, upsert: true }
+        );
+        res.status(200).json({ message: 'My Contscts recorded or updated successfully', contacts });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 // Get List of Profiles I have Viewed with Pagination
 exports.getMyViewedProfiles = async (req, res) => {
     const { userId } = req.params;
@@ -148,6 +152,53 @@ exports.getWhoViewedProfile = async (req, res) => {
     }
 };
 
+// Get List of Profiles I have Viewed with Pagination
+exports.getMyContactsProfiles = async (req, res) => {
+    const { userId } = req.params;
+    let { page = 1, limit = 10 } = req.query;
+
+    // Ensure `page` and `limit` are positive integers
+    page = Math.max(parseInt(page, 10), 1);
+    limit = Math.max(parseInt(limit, 10), 1);
+
+    const skip = (page - 1) * limit;
+
+    try {
+        // Total count of views to calculate total pages
+        const totalViews = await MyContacts.countDocuments({ myUserId: userId });
+
+        // Fetch the paginated views sorted by date in descending order
+        const views = await ProfileView.find({ myUserId: userId })
+            .sort({ date: -1 }) // Sort by date descending
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        // Populate user data for the mycontacts profiles
+        const userCountList = await Promise.all(
+            views.map(async (view) => {
+                const viewedUser = await User.findOne({ userId: view.contactUserId });
+                return viewedUser;
+            })
+        );
+
+        // Filter out any null values in case some user data is missing
+        const filteredUserCountList = userCountList.filter((user) => user !== null);
+
+        // Construct the response
+        const response = {
+            page: {
+                totalPages: Math.ceil(totalViews / limit),
+                currentPage: page,
+            },
+            userCountList: filteredUserCountList,
+        };
+
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 // Get Interests Shown to Me
 exports.getInterestsShownToMe = async (req, res) => {
     const { userId } = req.params;
@@ -165,12 +216,13 @@ exports.getCounts = async (req, res) => {
 
     try {
         // Use Promise.all to perform all queries concurrently
-        const [myProfileViewsCount, otherProfileViewsCount, interestsReceivedCount, interestsSentCount, blockedCount] = await Promise.all([
+        const [myProfileViewsCount, otherProfileViewsCount, interestsReceivedCount, interestsSentCount, blockedCount, myContacts] = await Promise.all([
             ProfileView.countDocuments({ viewerId: userId }), // Count of profiles viewed by this user
             ProfileView.countDocuments({ viewedUserId: userId }), // Count of profiles viewed by Other user
             Interest.countDocuments({ targetUserId: userId }), // Count of interests received
             Interest.countDocuments({ interestedUserId: userId }), // Count of interests made
-            Block.countDocuments({ blockerId: userId }) // Count of users blocked by this user
+            Block.countDocuments({ blockerId: userId }), // Count of users blocked by this user
+            MyContacts.countDocuments({ myUserId: userId }) // Count of users my contacts by this user
         ]);
 
         res.status(200).json({
@@ -178,7 +230,8 @@ exports.getCounts = async (req, res) => {
             otherProfileViewsCount,
             interestsReceivedCount,
             interestsSentCount,
-            blockedCount
+            blockedCount,
+            myContacts
         });
     } catch (error) {
         res.status(500).json({ error: error.message });

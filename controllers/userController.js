@@ -415,7 +415,7 @@ exports.addShortlisted = async (req, res) => {
     const { myUserId, shortListUserId, status } = req.body;
     if (['REMOVE'].includes(status)) {
         await ShortListed.deleteOne({ myUserId, shortListUserId });
-        return res.status(200).json({ message: 'Interest removed successfully' });
+        return res.status(200).json({ message: 'Shortlist removed successfully' });
     }
     try {
         const view = await ShortListed.findOneAndUpdate(

@@ -15,7 +15,8 @@ router.get('/getMyViewedProfile/:userId', userController.getMyViewedProfiles);
 router.post('/blockUser', userController.blockUser);
 router.get('/getBlockedUsers/:userId', userController.getBlockedUsers); // Single definition
 router.get('/getWhoViewedProfile/:userId', userController.getWhoViewedProfile);
-router.get('/getInterestsShownToMe/:userId', userController.getInterestsShownToMe);
+router.get('/getInterestsRecived/:userId', userController.getInterestsRecived);
+router.get('/getInterestsSend/:userId', userController.getInterestsSend);
 router.get('/getCounts/:userId', userController.getCounts);
 
 // My Contacts

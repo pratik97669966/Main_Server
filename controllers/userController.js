@@ -19,7 +19,6 @@ exports.viewProfile = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 // Record or Update Interest with Latest Date
 exports.showInterest = async (req, res) => {
     const { interestedUserId, targetUserId } = req.body;
@@ -95,7 +94,6 @@ exports.getMyViewedProfiles = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 // Get List of Users Who Viewed My Profile with Pagination
 exports.getWhoViewedProfile = async (req, res) => {
     const { userId } = req.params;
@@ -108,11 +106,9 @@ exports.getWhoViewedProfile = async (req, res) => {
     const skip = (page - 1) * limit;
 
     try {
-        console.log({ userId, page, limit, skip });
 
         // Total count of views to calculate total pages
         const totalViews = await ProfileView.countDocuments({ viewedUserId: userId });
-        console.log({ totalViews });
 
         // Fetch the paginated views
         const views = await ProfileView.find({ viewedUserId: userId })
@@ -120,20 +116,17 @@ exports.getWhoViewedProfile = async (req, res) => {
             .skip(skip)
             .limit(limit)
             .exec();
-        console.log({ views });
 
         // Populate user data for the viewed profiles
         const userCountList = await Promise.all(
             views.map(async (view) => {
                 const viewedUser = await User.findOne({ userId: view.viewerId });
-                console.log({ view, viewedUser });
                 return viewedUser;
             })
         );
 
         // Filter out any null values in case some user data is missing
         const filteredUserCountList = userCountList.filter((user) => user !== null);
-        console.log({ filteredUserCountList });
 
         // Construct the response
         const response = {
@@ -144,14 +137,12 @@ exports.getWhoViewedProfile = async (req, res) => {
             userCountList: filteredUserCountList,
         };
 
-        console.log("Response:", JSON.stringify(response, null, 2));
         res.status(200).json(response);
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: error.message });
     }
 };
-
 // Get List of Profiles I have Viewed with Pagination
 exports.getMyContactsProfiles = async (req, res) => {
     const { userId } = req.params;
@@ -199,13 +190,101 @@ exports.getMyContactsProfiles = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-// Get Interests Shown to Me
-exports.getInterestsShownToMe = async (req, res) => {
+// Get Interests getInterestsSend
+exports.getInterestsSend = async (req, res) => {
     const { userId } = req.params;
+    let { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+
+    // Ensure `page` and `limit` are positive integers
+    page = Math.max(parseInt(page, 10), 1);
+    limit = Math.max(parseInt(limit, 10), 1);
+
+    const skip = (page - 1) * limit;
+
     try {
-        const interests = await Interest.find({ targetUserId: userId });
-        res.status(200).json(interests);
+
+        // Total count of views to calculate total pages
+        const totalViews = await Interest.countDocuments({ interestedUserId: userId });
+
+        // Fetch the paginated views
+        const views = await Interest.find({ interestedUserId: userId })
+            .sort({ date: -1 }) // Sort by date descending
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        // Populate user data for the viewed profiles
+        const userCountList = await Promise.all(
+            views.map(async (view) => {
+                const viewedUser = await User.findOne({ userId: view.targetUserId });
+                return viewedUser;
+            })
+        );
+
+        // Filter out any null values in case some user data is missing
+        const filteredUserCountList = userCountList.filter((user) => user !== null);
+
+        // Construct the response
+        const response = {
+            page: {
+                totalPages: Math.ceil(totalViews / limit),
+                currentPage: page,
+            },
+            userCountList: filteredUserCountList,
+        };
+
+        res.status(200).json(response);
     } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+// Get Interests getInterestsRecived
+exports.getInterestsRecived = async (req, res) => {
+    const { userId } = req.params;
+    let { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+
+    // Ensure `page` and `limit` are positive integers
+    page = Math.max(parseInt(page, 10), 1);
+    limit = Math.max(parseInt(limit, 10), 1);
+
+    const skip = (page - 1) * limit;
+
+    try {
+
+        // Total count of views to calculate total pages
+        const totalViews = await Interest.countDocuments({ targetUserId: userId });
+
+        // Fetch the paginated views
+        const views = await Interest.find({ targetUserId: userId })
+            .sort({ date: -1 }) // Sort by date descending
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        // Populate user data for the viewed profiles
+        const userCountList = await Promise.all(
+            views.map(async (view) => {
+                const viewedUser = await User.findOne({ userId: view.interestedUserId });
+                return viewedUser;
+            })
+        );
+
+        // Filter out any null values in case some user data is missing
+        const filteredUserCountList = userCountList.filter((user) => user !== null);
+
+        // Construct the response
+        const response = {
+            page: {
+                totalPages: Math.ceil(totalViews / limit),
+                currentPage: page,
+            },
+            userCountList: filteredUserCountList,
+        };
+
+        res.status(200).json(response);
+    } catch (error) {
+        console.error("Error:", error);
         res.status(500).json({ error: error.message });
     }
 };

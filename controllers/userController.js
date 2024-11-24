@@ -382,7 +382,7 @@ exports.getContacts = async (req, res) => {
         // Construct the response
         const response = {
             page: {
-                totalPages: Math.ceil(totalViews / limit),
+                totalPages: Math.ceil(totalContacts / limit),
                 currentPage: page,
             },
             userCountList: filteredUserCountList,

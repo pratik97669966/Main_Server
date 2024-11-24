@@ -376,9 +376,16 @@ exports.getContacts = async (req, res) => {
             contacts.map(async (contact) => User.findOne({ userId: contact.contactUserId }))
         );
 
+        // Filter out any null values in case some user data is missing
+        const filteredUserCountList = contactDetails.filter((user) => user !== null);
+
+        // Construct the response
         const response = {
-            page: { totalPages: Math.ceil(totalContacts / limit), currentPage: page },
-            contacts: contactDetails.filter(Boolean),
+            page: {
+                totalPages: Math.ceil(totalViews / limit),
+                currentPage: page,
+            },
+            userCountList: filteredUserCountList,
         };
 
         res.status(200).json(response);

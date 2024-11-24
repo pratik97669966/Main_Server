@@ -467,25 +467,27 @@ exports.getCounts = async (req, res) => {
     const { userId } = req.params;
 
     try {
-        const [profileViews, profileVisitors, interests, contacts, blocks] = await Promise.all([
+        // Use Promise.all to perform all queries concurrently
+        const [myProfileViewsCount, otherProfileViewsCount, interestsReceivedCount, interestsSentCount, blockedCount, myContacts] = await Promise.all([
             ProfileView.countDocuments({ viewerId: userId }),
             ProfileView.countDocuments({ viewedUserId: userId }),
+            Interest.countDocuments({ targetUserId: userId }),
             Interest.countDocuments({ interestedUserId: userId }),
-            MyContacts.countDocuments({ myUserId: userId }),
             Block.countDocuments({ blockerId: userId }),
+            MyContacts.countDocuments({ myUserId: userId })
         ]);
 
         res.status(200).json({
-            stats: {
-                totalProfileViews: profileViews,
-                totalProfileVisitors: profileVisitors,
-                totalInterests: interests,
-                totalContacts: contacts,
-                totalBlockedUsers: blocks,
-            },
+            myProfileViewsCount,
+            otherProfileViewsCount,
+            interestsReceivedCount,
+            interestsSentCount,
+            blockedCount,
+            myContacts
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
 

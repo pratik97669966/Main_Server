@@ -20,6 +20,10 @@ router.post('/interest', userController.showInterest); // Show interest in anoth
 router.get('/interests/received/:userId', userController.getInterestsRecived); // Interests received by user
 router.get('/interests/sent/:userId', userController.getInterestsSend); // Interests sent by user
 
+// ShortList Management
+router.post('/shortlisted', userController.addShortlisted); // Show interest in another user
+router.get('/shortlisted/:userId', userController.getShortlisted); // Interests received by user
+
 // Contacts Management
 router.post('/contact', userController.addContact); // Add a contact
 router.get('/contacts/:userId', userController.getContacts); // Get contacts of a user

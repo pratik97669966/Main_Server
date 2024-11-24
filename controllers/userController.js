@@ -5,7 +5,7 @@ const ProfileView = require('../models/ProfileView');
 const Interest = require('../models/Interest');
 const Block = require('../models/Block');
 const MyContacts = require('../models/MyContacts');
-
+const ShortListed = require('../models/ShortListed');
 // Utility Functions
 // Generate a unique user ID
 const generateUserId = async (prefix) => {
@@ -409,7 +409,60 @@ exports.removeContact = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+// ShortList Management
+// Add to ShortList
+exports.addShortlisted = async (req, res) => {
+    const { myUserId, shortListUserId, status } = req.body;
+    if (['REMOVE'].includes(status)) {
+        await ShortListed.deleteOne({ myUserId, shortListUserId });
+        return res.status(200).json({ message: 'Interest removed successfully' });
+    }
+    try {
+        const view = await ShortListed.findOneAndUpdate(
+            { myUserId, shortListUserId },
+            { date: new Date() },
+            { new: true, upsert: true }
+        );
+        res.status(200).json({ view });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
+// Get contacts of a user
+exports.getShortlisted = async (req, res) => {
+    const { userId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+
+    try {
+        const totalContacts = await ShortListed.countDocuments({ myUserId: userId });
+        const contacts = await ShortListed.find({ myUserId: userId })
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const contactDetails = await Promise.all(
+            contacts.map(async (contact) => User.findOne({ userId: contact.shortListUserId }))
+        );
+
+        // Filter out any null values in case some user data is missing
+        const filteredUserCountList = contactDetails.filter((user) => user !== null);
+
+        // Construct the response
+        const response = {
+            page: {
+                totalPages: Math.ceil(totalContacts / limit),
+                currentPage: page,
+            },
+            userCountList: filteredUserCountList,
+        };
+
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 // Block Management
 // Block a user
 exports.blockUser = async (req, res) => {
@@ -475,13 +528,14 @@ exports.getCounts = async (req, res) => {
 
     try {
         // Use Promise.all to perform all queries concurrently
-        const [myProfileViewsCount, otherProfileViewsCount, interestsReceivedCount, interestsSentCount, blockedCount, myContacts] = await Promise.all([
+        const [myProfileViewsCount, otherProfileViewsCount, interestsReceivedCount, interestsSentCount, blockedCount, myContacts, shortListed] = await Promise.all([
             ProfileView.countDocuments({ viewerId: userId }),
             ProfileView.countDocuments({ viewedUserId: userId }),
             Interest.countDocuments({ targetUserId: userId }),
             Interest.countDocuments({ interestedUserId: userId }),
             Block.countDocuments({ blockerId: userId }),
-            MyContacts.countDocuments({ myUserId: userId })
+            MyContacts.countDocuments({ myUserId: userId }),
+            ShortListed.countDocuments({ myUserId: userId })
         ]);
 
         res.status(200).json({
@@ -490,7 +544,8 @@ exports.getCounts = async (req, res) => {
             interestsReceivedCount,
             interestsSentCount,
             blockedCount,
-            myContacts
+            myContacts,
+            shortListed
         });
     } catch (error) {
         res.status(500).json({ error: error.message });

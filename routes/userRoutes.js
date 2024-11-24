@@ -21,10 +21,9 @@ router.get('/interests/received/:userId', userController.getInterestsRecived); /
 router.get('/interests/sent/:userId', userController.getInterestsSend); // Interests sent by user
 
 // Contacts Management
-router.post('/contact', userController.myContacts); // Add a contact
-router.get('/contacts/:userId', userController.getMyContacts); // Get contacts of a user
-router.post('/contacts/profiles', userController.getMyContactsProfiles); // Get contact profiles
-
+router.post('/contact', userController.addContact); // Add a contact
+router.get('/contacts/:userId', userController.getContacts); // Get contacts of a user
+router.post('/contacts/remove', userController.removeContact); // Remove contact
 // Block Management
 router.post('/block', userController.blockUser); // Block a user
 router.get('/blocks/:userId', userController.getBlockedUsers); // Get blocked users

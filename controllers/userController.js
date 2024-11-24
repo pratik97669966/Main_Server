@@ -19,10 +19,40 @@ exports.viewProfile = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-// Record or Update Interest with Latest Date
+// Record or Update Interest
 exports.showInterest = async (req, res) => {
-    const { interestedUserId, targetUserId } = req.body;
+    const { interestedUserId, targetUserId, status } = req.body;
+
     try {
+        if (status === 'CANCELLED' || status === 'REJECTED') {
+            // Remove the interest object
+            await Interest.deleteOne({ interestedUserId, targetUserId });
+            return res.status(200).json({ message: 'Interest removed successfully' });
+        }
+
+        if (status === 'ACCEPTED') {
+            // Remove from interest and add to contacts for both users
+            await Interest.deleteOne({ interestedUserId, targetUserId });
+
+            // Add mutual contacts
+            const date = new Date();
+            await Promise.all([
+                MyContacts.findOneAndUpdate(
+                    { myUserId: interestedUserId, contactUserId: targetUserId },
+                    { date },
+                    { new: true, upsert: true }
+                ),
+                MyContacts.findOneAndUpdate(
+                    { myUserId: targetUserId, contactUserId: interestedUserId },
+                    { date },
+                    { new: true, upsert: true }
+                )
+            ]);
+
+            return res.status(200).json({ message: 'Interest accepted and contacts updated successfully' });
+        }
+
+        // Default case: Record or update interest
         const interest = await Interest.findOneAndUpdate(
             { interestedUserId, targetUserId },
             { date: new Date() },
@@ -342,10 +372,49 @@ exports.blockUser = async (req, res) => {
 // Get List of Blocked Users
 exports.getBlockedUsers = async (req, res) => {
     const { userId } = req.params;
+    let { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+
+    // Ensure `page` and `limit` are positive integers
+    page = Math.max(parseInt(page, 10), 1);
+    limit = Math.max(parseInt(limit, 10), 1);
+
+    const skip = (page - 1) * limit;
+
     try {
-        const blockedByMe = await Block.find({ blockerId: userId });
-        res.status(200).json(blockedByMe);
+
+        // Total count of views to calculate total pages
+        const totalViews = await Block.countDocuments({ blockerId: userId });
+
+        // Fetch the paginated views
+        const views = await Block.find({ blockerId: userId })
+            .sort({ date: -1 }) // Sort by date descending
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        // Populate user data for the viewed profiles
+        const userCountList = await Promise.all(
+            views.map(async (view) => {
+                const viewedUser = await User.findOne({ userId: view.blockedUserId });
+                return viewedUser;
+            })
+        );
+
+        // Filter out any null values in case some user data is missing
+        const filteredUserCountList = userCountList.filter((user) => user !== null);
+
+        // Construct the response
+        const response = {
+            page: {
+                totalPages: Math.ceil(totalViews / limit),
+                currentPage: page,
+            },
+            userCountList: filteredUserCountList,
+        };
+
+        res.status(200).json(response);
     } catch (error) {
+        console.error("Error:", error);
         res.status(500).json({ error: error.message });
     }
 };

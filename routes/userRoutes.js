@@ -2,26 +2,35 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 
-router.post('/createnewuser', userController.createNewUser);
-router.put('/updateuser', userController.updateUser);
-router.get('/users/:userId', userController.getUserById);
-router.get('/getallusers', userController.getAllUsers);
-router.get('/getbygender/:gender', userController.getUsersByGender);
-router.delete('/users/:userId', userController.deleteUser);
+// User Management
+router.post('/user', userController.createNewUser); // Create a new user
+router.put('/user', userController.updateUser); // Update a user's information
+router.get('/user/:userId', userController.getUserById); // Get user by ID
+router.get('/users', userController.getAllUsers); // Get all users
+router.get('/users/gender/:gender', userController.getUsersByGender); // Get users by gender
+router.delete('/user/:userId', userController.deleteUser); // Delete a user
 
-router.post('/viewProfile', userController.viewProfile);
-router.post('/showInterest', userController.showInterest);
-router.get('/getMyViewedProfile/:userId', userController.getMyViewedProfiles);
-router.post('/blockUser', userController.blockUser);
-router.get('/getBlockedUsers/:userId', userController.getBlockedUsers); // Single definition
-router.get('/getWhoViewedProfile/:userId', userController.getWhoViewedProfile);
-router.get('/getInterestsRecived/:userId', userController.getInterestsRecived);
-router.get('/getInterestsSend/:userId', userController.getInterestsSend);
-router.get('/getMyContacts/:userId', userController.getMyContacts);
-router.get('/getCounts/:userId', userController.getCounts);
+// Profile Management
+router.post('/profile/view', userController.viewProfile); // View a profile
+router.get('/profile/viewed/:userId', userController.getMyViewedProfiles); // Profiles the user has viewed
+router.get('/profile/viewers/:userId', userController.getWhoViewedProfile); // Who viewed the user's profile
 
-// My Contacts
-router.post('/myContacts', userController.myContacts);
-router.post('/getMyContactsProfiles', userController.getMyContactsProfiles);
+// Interest Management
+router.post('/interest', userController.showInterest); // Show interest in another user
+router.get('/interests/received/:userId', userController.getInterestsRecived); // Interests received by user
+router.get('/interests/sent/:userId', userController.getInterestsSend); // Interests sent by user
+
+// Contacts Management
+router.post('/contact', userController.myContacts); // Add a contact
+router.get('/contacts/:userId', userController.getMyContacts); // Get contacts of a user
+router.post('/contacts/profiles', userController.getMyContactsProfiles); // Get contact profiles
+
+// Block Management
+router.post('/block', userController.blockUser); // Block a user
+router.get('/blocks/:userId', userController.getBlockedUsers); // Get blocked users
+
+// Statistics and Counts
+router.get('/counts/:userId', userController.getCounts); // Get statistics and counts
+
 
 module.exports = router;

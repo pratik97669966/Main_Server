@@ -140,7 +140,9 @@ const userSchema = new mongoose.Schema({
 
   isProfileBlur: Boolean,
   isHoroscopeVisible: Boolean,
-})
+},
+  { strict: false }
+)
 
 const User = mongoose.model('User', userSchema);
 

@@ -122,6 +122,7 @@ const newUserSchema = new mongoose.Schema({
     interests: { type: String },
     isProfileBlur: { type: Boolean },
     isHoroscopeVisible: { type: Boolean },
+    isRequestProfile: { type: Boolean },
 });
 
 const NewUser = mongoose.model('user', newUserSchema);

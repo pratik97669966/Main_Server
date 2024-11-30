@@ -23,7 +23,7 @@ router.get('/interests/sent/:userId', userController.getInterestsSend); // Inter
 // ShortList Management
 router.post('/shortlisted', userController.addShortlisted); // Show interest in another user
 router.get('/shortlisted/sent/:userId', userController.getShortlisted); // Interests received by user
-router.get('/shortlisted/received/:userId', userController.getWhoShortlisted); // Interests received by user
+// router.get('/shortlisted/received/:userId', userController.getWhoShortlisted); // Interests received by user
 
 // Contacts Management
 router.post('/contact', userController.addContact); // Add a contact

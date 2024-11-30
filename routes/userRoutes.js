@@ -22,7 +22,8 @@ router.get('/interests/sent/:userId', userController.getInterestsSend); // Inter
 
 // ShortList Management
 router.post('/shortlisted', userController.addShortlisted); // Show interest in another user
-router.get('/shortlisted/:userId', userController.getShortlisted); // Interests received by user
+router.get('/shortlisted/sent/:userId', userController.getShortlisted); // Interests received by user
+router.get('/shortlisted/received/:userId', userController.getWhoShortlisted); // Interests received by user
 
 // Contacts Management
 router.post('/contact', userController.addContact); // Add a contact
@@ -31,6 +32,11 @@ router.post('/contacts/remove', userController.removeContact); // Remove contact
 // Block Management
 router.post('/block', userController.blockUser); // Block a user
 router.get('/blocks/:userId', userController.getBlockedUsers); // Get blocked users
+
+// View Contact
+router.post('/view/contact', userController.viewContact); // View contact
+router.get('/view/contact/sent/:userId', userController.getViewContactSend); // View contact Send by user
+router.get('/view/contact/received/:userId', userController.getViewContactReceived); // View contact received by user
 
 // Statistics and Counts
 router.get('/counts/:userId', userController.getCounts); // Get statistics and counts

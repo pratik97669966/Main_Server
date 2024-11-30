@@ -70,6 +70,26 @@ const formatDate = (date) => {
 
     return `${day}-${month}-${year}`;
 };
+const getHeight = (value) => {
+    const heightMap = [
+        "Does not Matter",
+        "4'0", "4'1", "4'2", "4'3", "4'4", "4'5", "4'6", "4'7", "4'8", "4'9",
+        "4'10", "4'11", "5'0", "5'1", "5'2", "5'3", "5'4", "5'5", "5'6", "5'7",
+        "5'8", "5'9", "5'10", "5'11", "6'0", "6'1", "6'2", "6'3", "6'4", "6'5",
+        "6'6", "6'7", "6'8", "6'9", "6'10", "6'11", "7'0"
+    ];
+
+    if (value === "Does not Matter") {
+        return "Does not Matter";
+    }
+
+    const index = parseInt(value, 10); // Parse the input as an integer
+    if (!isNaN(index) && index >= 1 && index < heightMap.length) {
+        return heightMap[index];
+    }
+
+    return "";
+};
 const removeHtmlTags = (input) => {
     if (!input) return ''; // Return empty if input is falsy
     // Remove HTML tags and replace \r\n, \n, and \r with a space
@@ -133,9 +153,9 @@ const migrateData = async () => {
                 workingExperience: removeHtmlTags(oldUser.work_experiance_year || ""),
                 workingExperienceDetails: removeHtmlTags(oldUser.Experience_Details || ""),
                 lookingFor: removeHtmlTags(oldUser.Looking || ""),
-                partnerAgeRange: removeHtmlTags(`${oldUser.PE_FromAge}-${oldUser.PE_ToAge}` || ""),
-                partnerHeightRange: removeHtmlTags(`${oldUser.PE_from_Height}-${oldUser.PE_to_Height}` || ""),
-                partnerIncomeRange: removeHtmlTags(`${oldUser.PE_income_from}-${oldUser.PE_income_to}` || ""),
+                partnerAgeRange: removeHtmlTags(`${oldUser.PE_FromAge ? `From ${oldUser.PE_FromAge}` : ""} ${oldUser.PE_ToAge ? `To ${oldUser.PE_ToAge}` : ""}`.trim()),
+                partnerHeightRange: removeHtmlTags(`${oldUser.PE_from_Height ? `From ${getHeight(oldUser.PE_from_Height)}` : ""} ${oldUser.PE_to_Height ? `To ${getHeight(oldUser.PE_to_Height)}` : ""}`.trim()),
+                partnerIncomeRange: removeHtmlTags(`${oldUser.PE_income_from ? `From ${oldUser.PE_income_from}` : ""} ${oldUser.PE_income_to ? `To ${oldUser.PE_income_to}` : ""}`.trim()),
                 partnerComplexion: removeHtmlTags(oldUser.PE_Complexion || ""),
                 partnerDiet: removeHtmlTags(oldUser.Diet || ""),
                 expectedEducation: removeHtmlTags(oldUser.PE_Education || ""),
@@ -189,7 +209,7 @@ const migrateData = async () => {
                 alternatePhone: removeHtmlTags(oldUser.Mobile2 || ""),
                 mobile: removeHtmlTags(oldUser.Mobile || ""),
                 whatsappNo: removeHtmlTags(oldUser.Mobile || ""),
-                height: removeHtmlTags(oldUser.Height || ""),
+                height: removeHtmlTags(getHeight(oldUser.Height) || ""),
                 weight: weightValue,
                 bloodGroup: removeHtmlTags(oldUser.BloodGroup || ""),
                 complexion: removeHtmlTags(oldUser.Complexion || ""),

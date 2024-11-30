@@ -6,6 +6,7 @@ const Interest = require('../models/Interest');
 const Block = require('../models/Block');
 const MyContacts = require('../models/MyContacts');
 const ShortListed = require('../models/ShortListed');
+const ViewContact = require('../models/ViewContact');
 // Utility Functions
 // Generate a unique user ID
 const generateUserId = async (prefix) => {
@@ -194,8 +195,6 @@ exports.getWhoViewedProfile = async (req, res) => {
 };
 
 // Interests Management
-
-// Record or update an interest
 exports.showInterest = async (req, res) => {
     const { interestedUserId, targetUserId, status } = req.body;
 
@@ -429,6 +428,122 @@ exports.addShortlisted = async (req, res) => {
     }
 };
 
+exports.viewContact = async (req, res) => {
+    const { viewContactUserId, viewContactTargetUserId, viewContactStatus } = req.body;
+    // if (['REMOVE'].includes(viewContactStatus)) {
+    //     await ShortListed.deleteOne({ viewContactUserId, viewContactTargetUserId });
+    //     return res.status(200).json({ message: 'View Contact removed successfully' });
+    // }
+    try {
+        const view = await ViewContact.findOneAndUpdate(
+            { viewContactUserId, viewContactTargetUserId, viewContactStatus },
+            { date: new Date() },
+            { new: true, upsert: true }
+        );
+        res.status(200).json({ view });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// getViewContactSend
+exports.getViewContactSend = async (req, res) => {
+    const { userId } = req.params;
+    let { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+
+    // Ensure `page` and `limit` are positive integers
+    page = Math.max(parseInt(page, 10), 1);
+    limit = Math.max(parseInt(limit, 10), 1);
+
+    const skip = (page - 1) * limit;
+
+    try {
+
+        // Total count of views to calculate total pages
+        // const totalViews = await ViewContact.countDocuments({ viewContactUserId: userId });
+
+        // Fetch the paginated views
+        const views = await ViewContact.find({ viewContactUserId: userId })
+            .sort({ date: -1 }) // Sort by date descending
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        // // Populate user data for the viewed profiles
+        // const userCountList = await Promise.all(
+        //     views.map(async (view) => {
+        //         const viewedUser = await User.findOne({ userId: view.viewContactTargetUserId });
+        //         return viewedUser;
+        //     })
+        // );
+
+        // // Filter out any null values in case some user data is missing
+        // const filteredUserCountList = userCountList.filter((user) => user !== null);
+
+        // // Construct the response
+        // const response = {
+        //     page: {
+        //         totalPages: Math.ceil(totalViews / limit),
+        //         currentPage: page,
+        //     },
+        //     userCountList: filteredUserCountList,
+        // };
+
+        res.status(200).json(views);
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+// getViewContactReceived
+exports.getViewContactReceived = async (req, res) => {
+    const { userId } = req.params;
+    let { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
+
+    // Ensure `page` and `limit` are positive integers
+    page = Math.max(parseInt(page, 10), 1);
+    limit = Math.max(parseInt(limit, 10), 1);
+
+    const skip = (page - 1) * limit;
+
+    try {
+
+        // Total count of views to calculate total pages
+        // const totalViews = await ViewContact.countDocuments({ viewContactTargetUserId: userId });
+
+        // Fetch the paginated views
+        const views = await ViewContact.find({ viewContactTargetUserId: userId })
+            .sort({ date: -1 }) // Sort by date descending
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        // // Populate user data for the viewed profiles
+        // const userCountList = await Promise.all(
+        //     views.map(async (view) => {
+        //         const viewedUser = await User.findOne({ userId: view.viewContactUserId });
+        //         return viewedUser;
+        //     })
+        // );
+
+        // // Filter out any null values in case some user data is missing
+        // const filteredUserCountList = userCountList.filter((user) => user !== null);
+
+        // // Construct the response
+        // const response = {
+        //     page: {
+        //         totalPages: Math.ceil(totalViews / limit),
+        //         currentPage: page,
+        //     },
+        //     userCountList: filteredUserCountList,
+        // };
+
+        res.status(200).json(views);
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
 // Get contacts of a user
 exports.getShortlisted = async (req, res) => {
     const { userId } = req.params;
@@ -528,14 +643,16 @@ exports.getCounts = async (req, res) => {
 
     try {
         // Use Promise.all to perform all queries concurrently
-        const [myProfileViewsCount, otherProfileViewsCount, interestsReceivedCount, interestsSentCount, blockedCount, myContacts, shortListed] = await Promise.all([
+        const [myProfileViewsCount, otherProfileViewsCount, interestsReceivedCount, interestsSentCount, blockedCount, myContacts, shortListed, contactRequestSendCount, contactRequestReceivedCount] = await Promise.all([
             ProfileView.countDocuments({ viewerId: userId }),
             ProfileView.countDocuments({ viewedUserId: userId }),
             Interest.countDocuments({ targetUserId: userId }),
             Interest.countDocuments({ interestedUserId: userId }),
             Block.countDocuments({ blockerId: userId }),
             MyContacts.countDocuments({ myUserId: userId }),
-            ShortListed.countDocuments({ myUserId: userId })
+            ShortListed.countDocuments({ myUserId: userId }),
+            ViewContact.countDocuments({ viewContactUserId: userId }),
+            ViewContact.countDocuments({ viewContactTargetUserId: userId }),
         ]);
 
         res.status(200).json({
@@ -545,7 +662,9 @@ exports.getCounts = async (req, res) => {
             interestsSentCount,
             blockedCount,
             myContacts,
-            shortListed
+            shortListed,
+            contactRequestSendCount,
+            contactRequestReceivedCount
         });
     } catch (error) {
         res.status(500).json({ error: error.message });

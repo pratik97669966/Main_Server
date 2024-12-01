@@ -42,6 +42,32 @@ exports.createNewUser = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+// Set Last Seen for a User
+exports.setLastSeen = async (req, res) => {
+    const { userId } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ message: 'userId is required' });
+    }
+
+    try {
+        const currentTimeMillis = Date.now(); // Current time in milliseconds
+
+        const user = await User.findOneAndUpdate(
+            { userId },
+            { $set: { lastSeen: currentTimeMillis } },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({ message: 'Last seen updated successfully', lastSeen: currentTimeMillis });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
 // Update an existing user
 exports.updateUser = async (req, res) => {

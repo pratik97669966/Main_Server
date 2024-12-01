@@ -98,6 +98,9 @@ const removeHtmlTags = (input) => {
         .replace(/\s+/g, ' ')           // Replace multiple spaces with a single space
         .trim();                        // Remove any leading or trailing spaces
 };
+function dateToMilliseconds(dateString) {
+    return new Date(dateString).getTime();
+}
 const migrateData = async () => {
     try {
         const rawData = fs.readFileSync('./oldData.json'); // Adjust the path as needed
@@ -108,8 +111,8 @@ const migrateData = async () => {
         for (const oldUser of oldUsers) {
             const fixedTOB = oldUser.TOB ? oldUser.TOB.replace('::', '') : '';
 
-            const activationDate = isValidDate(oldUser.Regdate) ? formatDate(oldUser.Regdate) : '';
-            const expiryDate = isValidDate(oldUser.MemshipExpiryDate) ? formatDate(oldUser.MemshipExpiryDate) : '';
+            const activationDate = isValidDate(oldUser.Regdate) ? dateToMilliseconds(oldUser.Regdate) : 0;
+            const expiryDate = isValidDate(oldUser.MemshipExpiryDate) ? dateToMilliseconds(oldUser.MemshipExpiryDate) : 0;
 
             const weightValue = oldUser.Weight ? parseFloat(oldUser.Weight.split(' ')[0]) : 0;
 
@@ -117,12 +120,13 @@ const migrateData = async () => {
                 status: "ACTIVE_USER",
                 membershipPlan: removeHtmlTags(oldUser.Status || ""),
                 numberOfContacts: oldUser.Noofcontacts || 0,
-                activationDate: removeHtmlTags(activationDate + ""),
-                expiryDate: removeHtmlTags(expiryDate + ""),
+                activationDate: activationDate,
+                expiryDate: expiryDate ,
                 userId: removeHtmlTags(oldUser.MatriID || ""),
                 name: removeHtmlTags(oldUser.Name || ""),
                 phone: removeHtmlTags(oldUser.Mobile || ""),
                 country: removeHtmlTags(oldUser.Country || ""),
+                lastSeen: oldUser.last_seen != "0000-00-00 00:00:00" ? dateToMilliseconds(oldUser.last_seen) : 0,
                 state: removeHtmlTags(oldUser.State || ""),
                 city: removeHtmlTags(oldUser.City || ""),
                 profileCreatedFor: removeHtmlTags(oldUser.Profilecreatedby || ""),
@@ -237,6 +241,7 @@ const migrateData = async () => {
                 interests: removeHtmlTags(oldUser.Interests || ""),
                 isProfileBlur: oldUser.profile_approve === 'No',
                 isHoroscopeVisible: oldUser.horoscope_visibility !== 'paidhoro',
+                isRequestProfile: oldUser.phone_visibility !== 'paidphone',
             };
 
             // Trim all string fields

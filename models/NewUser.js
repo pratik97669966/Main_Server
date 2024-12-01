@@ -4,8 +4,9 @@ const newUserSchema = new mongoose.Schema({
     status: { type: String, default: 'NEW_ACCOUNT' },
     membershipPlan: { type: String },
     numberOfContacts: { type: Number, default: 0 },
-    activationDate: { type: Date },
-    expiryDate: { type: Date },
+    activationDate: { type: Number },
+    expiryDate: { type: Number },
+    lastSeen: { type: Number },
     userId: { type: String, unique: true, required: true },
     name: { type: String, required: true },
     phone: { type: String, required: true },
@@ -123,6 +124,7 @@ const newUserSchema = new mongoose.Schema({
     isProfileBlur: { type: Boolean },
     isHoroscopeVisible: { type: Boolean },
     isRequestProfile: { type: Boolean },
+    
 });
 
 const NewUser = mongoose.model('user', newUserSchema);

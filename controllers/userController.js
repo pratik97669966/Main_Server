@@ -460,7 +460,7 @@ exports.getViewContactSend = async (req, res) => {
     try {
 
         // Total count of views to calculate total pages
-        // const totalViews = await ViewContact.countDocuments({ viewContactUserId: userId });
+        const totalViews = await ViewContact.countDocuments({ viewContactUserId: userId });
 
         // Fetch the paginated views
         const views = await ViewContact.find({ viewContactUserId: userId })
@@ -480,14 +480,13 @@ exports.getViewContactSend = async (req, res) => {
         // // Filter out any null values in case some user data is missing
         // const filteredUserCountList = userCountList.filter((user) => user !== null);
 
-        // // Construct the response
-        // const response = {
-        //     page: {
-        //         totalPages: Math.ceil(totalViews / limit),
-        //         currentPage: page,
-        //     },
-        //     userCountList: filteredUserCountList,
-        // };
+        const response = {
+            page: {
+                totalPages: Math.ceil(totalViews / limit),
+                currentPage: page,
+            },
+            userCountList: views,
+        };
 
         res.status(200).json(views);
     } catch (error) {
@@ -509,7 +508,7 @@ exports.getViewContactReceived = async (req, res) => {
     try {
 
         // Total count of views to calculate total pages
-        // const totalViews = await ViewContact.countDocuments({ viewContactTargetUserId: userId });
+        const totalViews = await ViewContact.countDocuments({ viewContactTargetUserId: userId });
 
         // Fetch the paginated views
         const views = await ViewContact.find({ viewContactTargetUserId: userId })
@@ -529,14 +528,14 @@ exports.getViewContactReceived = async (req, res) => {
         // // Filter out any null values in case some user data is missing
         // const filteredUserCountList = userCountList.filter((user) => user !== null);
 
-        // // Construct the response
-        // const response = {
-        //     page: {
-        //         totalPages: Math.ceil(totalViews / limit),
-        //         currentPage: page,
-        //     },
-        //     userCountList: filteredUserCountList,
-        // };
+        // Construct the response
+        const response = {
+            page: {
+                totalPages: Math.ceil(totalViews / limit),
+                currentPage: page,
+            },
+            userCountList: views,
+        };
 
         res.status(200).json(views);
     } catch (error) {

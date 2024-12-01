@@ -5,8 +5,8 @@ const userSchema = new mongoose.Schema({
   status: String,
   membershipPlan: String,
   numberOfContacts: Number,
-  activationDate: String,
-  expiryDate: String,
+  activationDate: Number,
+  expiryDate: Number,
   lastSeen: Number,
 
   // User

@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   numberOfContacts: Number,
   activationDate: String,
   expiryDate: String,
+  lastSeen: Number,
 
   // User
   prefix: String,

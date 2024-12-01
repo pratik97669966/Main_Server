@@ -458,7 +458,6 @@ exports.getViewContactSend = async (req, res) => {
     const skip = (page - 1) * limit;
 
     try {
-
         // Total count of views to calculate total pages
         const totalViews = await ViewContact.countDocuments({ viewContactUserId: userId });
 
@@ -469,26 +468,31 @@ exports.getViewContactSend = async (req, res) => {
             .limit(limit)
             .exec();
 
-        // // Populate user data for the viewed profiles
-        // const userCountList = await Promise.all(
-        //     views.map(async (view) => {
-        //         const viewedUser = await User.findOne({ userId: view.viewContactTargetUserId });
-        //         return viewedUser;
-        //     })
-        // );
+        // Populate user data for the viewed profiles
+        const userCountList = await Promise.all(
+            views.map(async (view, index) => {
+                const viewedUser = await User.findOne({ userId: view.viewContactUserId });
+                const response = {
+                    userData: viewedUser,
+                    viewContact: views[index],
+                };
+                return response;
+            })
+        );
 
-        // // Filter out any null values in case some user data is missing
+        // Filter out any null values in case some user data is missing
         // const filteredUserCountList = userCountList.filter((user) => user !== null);
 
+        // Construct the response
         const response = {
             page: {
                 totalPages: Math.ceil(totalViews / limit),
                 currentPage: page,
             },
-            userCountList: views,
+            userCountList: userCountList,
         };
 
-        res.status(200).json(views);
+        res.status(200).json(response);
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: error.message });
@@ -517,15 +521,19 @@ exports.getViewContactReceived = async (req, res) => {
             .limit(limit)
             .exec();
 
-        // // Populate user data for the viewed profiles
-        // const userCountList = await Promise.all(
-        //     views.map(async (view) => {
-        //         const viewedUser = await User.findOne({ userId: view.viewContactUserId });
-        //         return viewedUser;
-        //     })
-        // );
+        // Populate user data for the viewed profiles
+        const userCountList = await Promise.all(
+            views.map(async (view, index) => {
+                const viewedUser = await User.findOne({ userId: view.viewContactUserId });
+                const response = {
+                    userData: viewedUser,
+                    viewContact: views[index],
+                };
+                return response;
+            })
+        );
 
-        // // Filter out any null values in case some user data is missing
+        // Filter out any null values in case some user data is missing
         // const filteredUserCountList = userCountList.filter((user) => user !== null);
 
         // Construct the response
@@ -534,10 +542,10 @@ exports.getViewContactReceived = async (req, res) => {
                 totalPages: Math.ceil(totalViews / limit),
                 currentPage: page,
             },
-            userCountList: views,
+            userCountList: userCountList,
         };
 
-        res.status(200).json(views);
+        res.status(200).json(response);
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: error.message });

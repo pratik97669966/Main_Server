@@ -44,7 +44,7 @@ exports.createNewUser = async (req, res) => {
 };
 // Set Last Seen for a User
 exports.setLastSeen = async (req, res) => {
-    const { userId } = req.body;
+    const { userId } = req.params;
 
     if (!userId) {
         return res.status(400).json({ message: 'userId is required' });

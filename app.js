@@ -22,11 +22,11 @@ app.use(bodyParser.json());
 app.use('/', userRoutes); // Prefix routes with /api
 app.use('/android/:userId', (req, res) => {
     const userId = req.params.userId;
-    // Construct a deep link URL
+    // Construct the deep link URL
     const deepLinkUrl = `kartavyavivahbandhan://user/${userId}`;
 
-    // Return the deep link URL
-    res.json({ deepLink: deepLinkUrl });
+    // Redirect the user to the deep link
+    res.redirect(deepLinkUrl);
 });
 app.get('/privacypolicy', (req, res) => {
     const filePath = path.join(__dirname, 'public', 'privacy_policy.html');

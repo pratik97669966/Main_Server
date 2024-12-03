@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const errorHandler = require('./middleware/errorHandler'); // If using
+const path = require('path');
 
 
 
@@ -20,6 +21,10 @@ app.use(bodyParser.json());
 // Routes
 app.use('/', userRoutes); // Prefix routes with /api
 
+app.get('/privacypolicy', (req, res) => {
+    const filePath = path.join(__dirname, 'public', 'privacy_policy.html');
+    res.sendFile(filePath);
+});
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found" });
 });

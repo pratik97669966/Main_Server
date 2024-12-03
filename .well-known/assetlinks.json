@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.kartavya.vivahbandhan",
+            "sha256_cert_fingerprints": [
+                "10:82:96:BE:83:6C:B9:72:7A:7E:B8:03:B4:9E:FB:40:3E:FB:31:30:DA:31:11:E0:25:8D:22:3C:64:B5:56:B9"
+            ]
+        }
+    }
+]

@@ -20,6 +20,37 @@ app.use(bodyParser.json());
 
 // Routes
 app.use('/', userRoutes); // Prefix routes with /api
+app.use('/android/:userId', (req, res) => {
+    const userId = req.params.userId;
+    
+    // Construct the deep link URL
+    const deepLinkUrl = `kartavyavivahbandhan://user/${userId}`;
+    
+    // Construct the Play Store URL
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.kartavya.vivahbandhan'; // Replace with your app's package name
+
+    // Serve an HTML page to handle the redirection logic
+    const htmlContent = `
+        <html>
+        <head>
+            <script type="text/javascript">
+                // Try opening the deep link
+                window.location.href = "${deepLinkUrl}";
+
+                // After 2 seconds, redirect to Play Store if the app is not installed
+                setTimeout(function() {
+                    window.location.href = "${playStoreUrl}";
+                }, 2000); // 2 seconds delay
+            </script>
+        </head>
+        <body>
+            <p>If you are not redirected, <a href="${playStoreUrl}">click here to open in Play Store</a>.</p>
+        </body>
+        </html>
+    `;
+    
+    res.send(htmlContent);
+});
 
 app.get('/privacypolicy', (req, res) => {
     const filePath = path.join(__dirname, 'public', 'privacy_policy.html');

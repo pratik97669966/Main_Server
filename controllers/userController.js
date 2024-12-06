@@ -141,7 +141,7 @@ exports.getUsersByFilter = async (req, res) => {
         // Build the match filter dynamically
         const matchFilter = { gender, membershipPlan: "Paid" };
 
-        if (lookingfor) {
+        if (lookingfor !='All') {
             matchFilter.maritalStatus = lookingfor;
         }
 

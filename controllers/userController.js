@@ -497,7 +497,7 @@ exports.getViewContactSend = async (req, res) => {
         // Populate user data for the viewed profiles
         const userCountList = await Promise.all(
             views.map(async (view, index) => {
-                const viewedUser = await User.findOne({ userId: view.viewContactUserId });
+                const viewedUser = await User.findOne({ userId: view.viewContactTargetUserId });
                 const response = {
                     userData: viewedUser,
                     viewContact: views[index],

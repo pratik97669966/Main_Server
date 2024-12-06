@@ -9,6 +9,7 @@ router.get('/user/:userId', userController.getUserById); // Get user by ID
 router.get('/user/last/seen/:userId', userController.setLastSeen); // Set user last seen
 router.get('/users', userController.getAllUsers); // Get all users
 router.get('/users/gender/:gender', userController.getUsersByGender); // Get users by gender
+router.get('/users/gender/:gender/:lookingfor', userController.getUsersByFilter); // Get users by gender
 router.delete('/user/:userId', userController.deleteUser); // Delete a user
 
 // Profile Management

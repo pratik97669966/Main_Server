@@ -133,6 +133,31 @@ exports.getUsersByGender = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+// Get users by gender
+exports.getUsersByFilter = async (req, res) => {
+    const { gender, lookingfor } = req.params;
+
+    try {
+        // Build the match filter dynamically
+        const matchFilter = { gender, membershipPlan: "Paid" };
+
+        if (lookingfor) {
+            matchFilter.maritalStatus = lookingfor;
+        }
+
+        // Aggregate query
+        const users = await User.aggregate([
+            { $match: matchFilter },
+            { $sample: { size: 50 } }, // Random sampling
+        ]);
+
+        // Send response
+        res.json(users);
+    } catch (error) {
+        // Catch and handle errors
+        res.status(500).json({ error: error.message });
+    }
+};
 
 // Delete a user by userId
 exports.deleteUser = async (req, res) => {

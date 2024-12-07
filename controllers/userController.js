@@ -174,7 +174,7 @@ exports.getUsersByFilter = async (req, res) => {
 // API function for search by name
 exports.searchByName = async (req, res) => {
     const searchData = req.body;
-    const { name } = searchData;
+    const { name, gender } = searchData;
 
     try {
         // Validate if name is passed in the query
@@ -182,11 +182,16 @@ exports.searchByName = async (req, res) => {
             return res.status(400).json({ error: "Name parameter is required" });
         }
 
-        // Create a filter for case-insensitive name search
+        // Create the filter object dynamically
         const filter = { name: { $regex: name, $options: "i" } };
 
-        // Perform the query using find and limit the results to 10 records
-        const users = await User.find(filter).limit(50);  // Limit the results to 10 users for faster performance
+        // If gender is provided, include it in the filter
+        if (gender) {
+            filter.gender = gender;
+        }
+
+        // Perform the query using find and limit the results to 50 records
+        const users = await User.find(filter).limit(50);  // Limit the results to 50 users for performance
 
         // Return the whole user object for each result
         res.json(users);
@@ -196,6 +201,7 @@ exports.searchByName = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 // Delete a user by userId
 exports.deleteUser = async (req, res) => {

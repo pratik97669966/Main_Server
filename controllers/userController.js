@@ -172,6 +172,8 @@ exports.getUsersByFilter = async (req, res) => {
 };
 
 // API function for search by name
+const userIdPattern = /^[A-Z]{2}\d{4}$/;
+
 exports.searchByName = async (req, res) => {
     const searchData = req.body;
     const { name, gender } = searchData;
@@ -183,7 +185,16 @@ exports.searchByName = async (req, res) => {
         }
 
         // Create the filter object dynamically
-        const filter = { name: { $regex: name, $options: "i" } };
+        let filter = {};
+
+        // Check if the name matches the userId pattern (e.g., KB4521, KG4589)
+        if (userIdPattern.test(name)) {
+            // If it matches the pattern, search by userId
+            filter.userId = name;
+        } else {
+            // If it's a name, search by name (case-insensitive)
+            filter.name = { $regex: name, $options: "i" };
+        }
 
         // If gender is provided, include it in the filter
         if (gender) {
@@ -201,6 +212,7 @@ exports.searchByName = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 
 // Delete a user by userId

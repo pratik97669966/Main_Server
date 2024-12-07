@@ -186,7 +186,7 @@ exports.searchByName = async (req, res) => {
         const filter = { name: { $regex: name, $options: "i" } };
 
         // Perform the query using find and limit the results to 10 records
-        const users = await User.find(filter).limit(10);  // Limit the results to 10 users for faster performance
+        const users = await User.find(filter).limit(50);  // Limit the results to 10 users for faster performance
 
         // Return the whole user object for each result
         res.json(users);

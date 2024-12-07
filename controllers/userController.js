@@ -186,37 +186,17 @@ exports.searchByName = async (req, res) => {
         const filter = { name: { $regex: name, $options: "i" } };
 
         // Perform the query using find and limit the results to 10 records
-        const users = await User.find(filter, {
-            userId: 1,
-            profilePictureUrls: { $slice: 1 },  // Fetch only the first profile picture URL
-            height: 1,
-            dateOfBirth: 1,
-            city: 1,
-            subCaste: 1,
-            workingLocationCity: 1,
-            occupation: 1,
-        }).limit(10);  // Limit the results to 10 users for faster performance
+        const users = await User.find(filter).limit(10);  // Limit the results to 10 users for faster performance
 
-        // Map the users to the response format
-        const userList = users.map(user => ({
-            userId: user.userId,
-            profilePhotoUrl: user.profilePictureUrls[0] || null,  // Return null if no profile photo
-            height: user.height,
-            dateOfBirth: user.dateOfBirth,
-            city: user.city,
-            subCaste: user.subCaste,
-            workingLocationCity: user.workingLocationCity,
-            occupation: user.occupation,
-        }));
-
-        // Return the response
-        res.json(userList);
+        // Return the whole user object for each result
+        res.json(users);
 
     } catch (error) {
         // Handle errors (e.g., database connection, query issues)
         res.status(500).json({ error: error.message });
     }
 };
+
 // Delete a user by userId
 exports.deleteUser = async (req, res) => {
     const { userId } = req.params;

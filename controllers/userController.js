@@ -135,23 +135,35 @@ exports.getUsersByGender = async (req, res) => {
 };
 // Get users by gender
 exports.getUsersByFilter = async (req, res) => {
-    const { gender, lookingfor } = req.params;
+    const { userId, gender, lookingfor } = req.params;
 
     try {
-        // Build the match filter dynamically
-        const matchFilter = { gender, membershipPlan: "Paid" };
+        // Step 1: Find the user by userId
+        const user = await User.findOne({ userId });
 
-        if (lookingfor !='All') {
-            matchFilter.maritalStatus = lookingfor;
+        // If user is not found, return an error response
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
         }
 
-        // Aggregate query
+        // Step 2: Build the match filter dynamically based on the user's preferences
+        const matchFilter = {
+            gender: user.gender === "Male" ? "Female" : "Male", // Adjust based on your logic
+            membershipPlan: "Paid", // Filter by paid members
+        };
+
+        // If the user has a specific preference for marital status, apply it
+        if (user.lookingFor && user.lookingFor !== "All") {
+            matchFilter.maritalStatus = user.lookingFor;
+        }
+
+        // Step 3: Query the database for matching users
         const users = await User.aggregate([
-            { $match: matchFilter },
+            { $match: matchFilter }, // Apply filters
             { $sample: { size: 50 } }, // Random sampling
         ]);
 
-        // Send response
+        // Step 4: Send the matching users in the response
         res.json(users);
     } catch (error) {
         // Catch and handle errors
@@ -159,6 +171,52 @@ exports.getUsersByFilter = async (req, res) => {
     }
 };
 
+// API function for search by name
+exports.searchByName = async (req, res) => {
+    const searchData = req.body;
+    const { name } = searchData;
+
+    try {
+        // Validate if name is passed in the query
+        if (!name) {
+            return res.status(400).json({ error: "Name parameter is required" });
+        }
+
+        // Create a filter for case-insensitive name search
+        const filter = { name: { $regex: name, $options: "i" } };
+
+        // Perform the query using find and limit the results to 10 records
+        const users = await User.find(filter, {
+            userId: 1,
+            profilePictureUrls: { $slice: 1 },  // Fetch only the first profile picture URL
+            height: 1,
+            dateOfBirth: 1,
+            city: 1,
+            subCaste: 1,
+            workingLocationCity: 1,
+            occupation: 1,
+        }).limit(10);  // Limit the results to 10 users for faster performance
+
+        // Map the users to the response format
+        const userList = users.map(user => ({
+            userId: user.userId,
+            profilePhotoUrl: user.profilePictureUrls[0] || null,  // Return null if no profile photo
+            height: user.height,
+            dateOfBirth: user.dateOfBirth,
+            city: user.city,
+            subCaste: user.subCaste,
+            workingLocationCity: user.workingLocationCity,
+            occupation: user.occupation,
+        }));
+
+        // Return the response
+        res.json(userList);
+
+    } catch (error) {
+        // Handle errors (e.g., database connection, query issues)
+        res.status(500).json({ error: error.message });
+    }
+};
 // Delete a user by userId
 exports.deleteUser = async (req, res) => {
     const { userId } = req.params;

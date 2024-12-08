@@ -107,6 +107,7 @@ const migrateData = async () => {
         const oldUsers = JSON.parse(rawData);
         const newUsersData = {};
         const mobileToUserIdMapping = {};
+        const photourls = {};
 
         for (const oldUser of oldUsers) {
             const fixedTOB = oldUser.TOB ? oldUser.TOB.replace('::', '') : '';
@@ -131,13 +132,13 @@ const migrateData = async () => {
                 city: removeHtmlTags(oldUser.City || ""),
                 profileCreatedFor: removeHtmlTags(oldUser.Profilecreatedby || ""),
                 profilePictureUrls: [
-                    oldUser.Photo1 ? `https://kartavyavivahbandhan.com/gallary/${oldUser.Photo1}` : null
+                    oldUser.Photo1 ? `https://kartavyavivahbandhanstorage.s3.ap-south-1.amazonaws.com/${oldUser.Photo1}` : null
                 ].filter(Boolean),
                 gender: removeHtmlTags(oldUser.Gender || ""),
                 religion: removeHtmlTags(oldUser.Religion || ""),
                 caste: removeHtmlTags(oldUser.Caste || ""),
                 subCaste: removeHtmlTags(oldUser.Subcaste || ""),
-                maritalStatus: removeHtmlTags(oldUser.Maritalstatus === "Unmarried" ? "Unmarried" :  "Divorced / Widowed"),
+                maritalStatus: removeHtmlTags(oldUser.Maritalstatus === "Unmarried" ? "Unmarried" : "Divorced / Widowed"),
                 dateOfBirth: removeHtmlTags(formatDateOfBirth(oldUser.DOB) + "") || "",
                 age: removeHtmlTags(oldUser.Age || ""),
                 email: removeHtmlTags(oldUser.ConfirmEmail || ""),
@@ -246,15 +247,18 @@ const migrateData = async () => {
 
             // Trim all string fields
             trimStringFields(newUser);
-
-            const userId = oldUser.MatriID || `user_${Math.random().toString(36).substr(2, 9)}`;
-            newUsersData[userId] = newUser;
-            mobileToUserIdMapping[newUser.phone] = userId;
-
-            const userRecord = new NewUser(newUser);
-            await userRecord.save();
+            const userId = oldUser.MatriID || null;
+            if (userId) {
+                if (oldUser.Mobile.length == 10) {
+                    newUsersData[userId] = newUser;
+                    mobileToUserIdMapping[newUser.phone] = userId;
+                    photourls[userId] = oldUser.Mobile;
+                    const userRecord = new NewUser(newUser);
+                    await userRecord.save();
+                }
+            }
         }
-
+        fs.writeFileSync('./userNotMobile.json', JSON.stringify(photourls, null, 2));
         fs.writeFileSync('./outputfirebaseMOBILE.json', JSON.stringify(mobileToUserIdMapping, null, 2));
         fs.writeFileSync('./outputfirebaseUSER.json', JSON.stringify(newUsersData, null, 2));
 

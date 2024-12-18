@@ -13,7 +13,8 @@ router.get('/matches/:userId/:gender/:lookingfor', userController.getUsersByFilt
 router.delete('/user/:userId', userController.deleteUser); // Delete a user
 // Search User
 router.post('/searchbyname', userController.searchByName); // Search By Name
-
+// Unregister user
+router.get('/unregister', userController.getUnregister); // Search By Name
 // Profile Management
 router.post('/profile/view', userController.viewProfile); // View a profile
 router.get('/profile/viewed/:userId', userController.getMyViewedProfiles); // Profiles the user has viewed

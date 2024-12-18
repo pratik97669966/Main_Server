@@ -118,7 +118,7 @@ const migrateData = async () => {
             const weightValue = oldUser.Weight ? parseFloat(oldUser.Weight.split(' ')[0]) : 0;
 
             const newUser = {
-                status: "ACTIVE_USER",
+                status: oldUser.Status == "Paid" ? "ACTIVE_USER" : "NEW_ACCOUNT",
                 membershipPlan: removeHtmlTags(oldUser.Status || ""),
                 numberOfContacts: oldUser.Noofcontacts || 0,
                 activationDate: activationDate,

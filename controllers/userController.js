@@ -170,7 +170,21 @@ exports.getUsersByFilter = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
+// unregister user
+exports.getUnregister = async (req, res) => {
+    try {
+            const matchFilter = {
+            status: "NEW_ACCOUNT",
+        };
+        const users = await User.aggregate([
+            { $match: matchFilter },
+        ]);
+        res.json(users);
+    } catch (error) {
+        // Catch and handle errors
+        res.status(500).json({ error: error.message });
+    }
+};
 // API function for search by name
 const userIdPattern = /^[A-Z]{2}\d{4}$/;
 

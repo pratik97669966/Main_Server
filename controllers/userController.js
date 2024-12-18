@@ -178,6 +178,7 @@ exports.getUnregister = async (req, res) => {
         };
         const users = await User.aggregate([
             { $match: matchFilter },
+            { $sample: { size: 50 } }
         ]);
         res.json(users);
     } catch (error) {

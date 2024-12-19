@@ -193,7 +193,7 @@ exports.getUnregister = async (req, res) => {
                 currentPage: Number(page),
                 totalRecords: totalUnregister,
             },
-            users: unregisterUsers,
+            userCountList: unregisterUsers,
         };
 
         res.status(200).json(response);

@@ -173,24 +173,28 @@ exports.getUsersByFilter = async (req, res) => {
 };
 // unregister user
 exports.getUnregister = async (req, res) => {
-    const { page = 1, limit = 10 } = req.query;
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default limit to 10
     const skip = (page - 1) * limit;
 
     try {
         const matchFilter = {
             status: "NEW_ACCOUNT",
-            activationDate: 0 || null
+            activationDate: { $in: [0, null] } // Match 0 or null
         };
 
-        const totalUnregister = await User.countDocuments(matchFilter); // Total number of new accounts
+        // Count total number of new accounts
+        const totalUnregister = await User.countDocuments(matchFilter);
+        
+        // Fetch the users with pagination
         const unregisterUsers = await User.find(matchFilter)
             .skip(skip)
-            .limit(Number(limit));
+            .limit(limit);
 
         const response = {
             page: {
-                totalPages: Math.ceil(totalUnregister / limit),
-                currentPage: Number(page),
+                totalPages: Math.ceil(totalUnregister / limit), // Total pages calculation
+                currentPage: page,
                 totalRecords: totalUnregister,
             },
             userCountList: unregisterUsers,
@@ -198,11 +202,10 @@ exports.getUnregister = async (req, res) => {
 
         res.status(200).json(response);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error fetching unregistered users:", error.message);
+        res.status(500).json({ error: "An error occurred while fetching data." });
     }
 };
-
-
 
 // API function for search by name
 const userIdPattern = /^[A-Z]{2}\d{4}$/;

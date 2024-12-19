@@ -179,11 +179,11 @@ exports.getUnregister = async (req, res) => {
     try {
         const matchFilter = {
             status: "NEW_ACCOUNT",
+            activationDate: 0 || null
         };
 
         const totalUnregister = await User.countDocuments(matchFilter); // Total number of new accounts
         const unregisterUsers = await User.find(matchFilter)
-            .sort({ activationDate: 0 || null })
             .skip(skip)
             .limit(Number(limit));
 

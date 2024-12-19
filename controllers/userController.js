@@ -183,7 +183,7 @@ exports.getUnregister = async (req, res) => {
 
         const totalUnregister = await User.countDocuments(matchFilter); // Total number of new accounts
         const unregisterUsers = await User.find(matchFilter)
-            .sort({ activationDate: -1 }) // Sort by activationDate in descending order
+            .sort({ activationDate: 0 || null })
             .skip(skip)
             .limit(Number(limit));
 

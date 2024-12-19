@@ -19,7 +19,7 @@ const generateUserId = async (prefix) => {
     sequence.sequence += 1;
     await sequence.save();
 
-    return `${prefix}${String(sequence.sequence).padStart(5, '0')}`; // e.g., lastUser00001
+    return `${prefix}${String(sequence.sequence).padStart(4, '0')}`; // e.g., lastUser00001
 };
 
 // User Management
@@ -34,7 +34,7 @@ exports.createNewUser = async (req, res) => {
 
         const userId = await generateUserId(prefix);
 
-        const user = new User({ ...userData, userId });
+        const user = new User({ ...userData, userId, activationDate: Date.now() });
         await user.save();
 
         res.status(201).json(user);
@@ -149,7 +149,8 @@ exports.getUsersByFilter = async (req, res) => {
         // Step 2: Build the match filter dynamically based on the user's preferences
         const matchFilter = {
             gender: user.gender === "Male" ? "Female" : "Male", // Adjust based on your logic
-            membershipPlan: "Paid", // Filter by paid members
+            membershipPlan: "Paid",
+            status: "ACTIVE_USER",
         };
 
         // If the user has a specific preference for marital status, apply it
@@ -172,20 +173,36 @@ exports.getUsersByFilter = async (req, res) => {
 };
 // unregister user
 exports.getUnregister = async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+
     try {
         const matchFilter = {
             status: "NEW_ACCOUNT",
         };
-        const users = await User.aggregate([
-            { $match: matchFilter },
-            { $sort: { createdAt: -1 } } // Sort by `createdAt` in descending order
-        ]);
-        res.json(users);
+
+        const totalUnregister = await User.countDocuments(matchFilter); // Total number of new accounts
+        const unregisterUsers = await User.find(matchFilter)
+            .sort({ activationDate: -1 }) // Sort by activationDate in descending order
+            .skip(skip)
+            .limit(Number(limit));
+
+        const response = {
+            page: {
+                totalPages: Math.ceil(totalUnregister / limit),
+                currentPage: Number(page),
+                totalRecords: totalUnregister,
+            },
+            users: unregisterUsers,
+        };
+
+        res.status(200).json(response);
     } catch (error) {
-        // Catch and handle errors
         res.status(500).json({ error: error.message });
     }
 };
+
+
 
 // API function for search by name
 const userIdPattern = /^[A-Z]{2}\d{4}$/;

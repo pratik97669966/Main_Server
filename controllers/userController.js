@@ -34,7 +34,10 @@ exports.createNewUser = async (req, res) => {
 
         const userId = await generateUserId(prefix);
 
-        const user = new User({ ...userData, userId, activationDate: Date.now() });
+        // Ensure activationDate is explicitly in milliseconds
+        const activationDate = Date.now(); // Current time in milliseconds
+
+        const user = new User({ ...userData, userId, activationDate });
         await user.save();
 
         res.status(201).json(user);
@@ -42,6 +45,7 @@ exports.createNewUser = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
 // Set Last Seen for a User
 exports.setLastSeen = async (req, res) => {
     const { userId } = req.params;

@@ -185,10 +185,12 @@ exports.getUnregister = async (req, res) => {
         // Count total number of new accounts
         const totalUnregister = await User.countDocuments(matchFilter);
 
-        // Fetch the users with pagination
+        // Fetch the users with pagination in reverse order (e.g., newest first)
         const unregisterUsers = await User.find(matchFilter)
+            .sort({ _id: -1 }) // Sort in descending order of _id
             .skip(skip)
-            .limit(limit);
+            .limit(limit)
+            .exec();
 
         const response = {
             page: {
@@ -205,6 +207,7 @@ exports.getUnregister = async (req, res) => {
         res.status(500).json({ error: "An error occurred while fetching data." });
     }
 };
+
 
 // API function for search by name
 const userIdPattern = /^[A-Z]{2}\d{4}$/;

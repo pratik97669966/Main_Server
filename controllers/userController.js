@@ -10,7 +10,7 @@ const ViewContact = require('../models/ViewContact');
 // Utility Functions
 // Generate a unique user ID
 const generateUserId = async (prefix) => {
-    let sequence = await Sequence.findOne({ prefix });
+    let sequence = await Sequence.findOne({ prefix: 'user' });
 
     if (!sequence) {
         sequence = new Sequence({ prefix, sequence: 0 });
@@ -826,5 +826,3 @@ exports.getCounts = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
-

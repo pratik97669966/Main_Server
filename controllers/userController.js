@@ -218,7 +218,7 @@ const userIdPattern = /^[A-Z]{2}\d{4}$/;
 
 exports.searchByName = async (req, res) => {
     const searchData = req.body;
-    const { name, gender } = searchData;
+    const { name, gender, isAdmin = false } = searchData;
 
     try {
         // Validate if name is passed in the query
@@ -228,7 +228,10 @@ exports.searchByName = async (req, res) => {
 
         // Create the filter object dynamically
         let filter = {};
-
+        if (!isAdmin) {
+            filter.membershipPlan = "Paid";
+            filter.status = "ACTIVE_USER";
+        }
         // Check if the name matches the userId pattern (e.g., KB4521, KG4589)
         if (userIdPattern.test(name)) {
             // If it matches the pattern, search by userId

@@ -29,14 +29,13 @@ const migrateProfileViews = async () => {
                     viewContactUserId: viewerId,
                     date: new Date(oldView.date) // Convert date to ISO format
                 };
-
-                // const profileViewRecord = new ProfileView({
-                //     viewerId,
-                //     viewedUserId,
-                //     date: new Date(oldView.date),
-                //     stability: oldView.stability || 0,
-                //     viewContactStatus: oldView.status === 'Accept' ? 'VIEWED' : oldView.status === 'Pending' ? 'REQUESTED' : 'REJECTED'
-                // });
+                const newView = {
+                    viewContactUserId: oldView.who,
+                    viewContactTargetUserId: oldView.whom,
+                    viewContactStatus: oldView.status === 'Accept' ? 'VIEWED' : oldView.status === 'Pending' ? 'REQUESTED' : 'REJECTED',
+                    date: new Date(oldView.date) // Convert date to ISO format
+                };
+                // const profileViewRecord = new ProfileView(newView);
                 // await profileViewRecord.save();
             } else {
                 console.error('Invalid data for viewId:', oldView.view_id);

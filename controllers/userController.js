@@ -354,7 +354,7 @@ exports.showInterest = async (req, res) => {
         }
 
         if (status === 'ACCEPTED') {
-            await Interest.deleteOne({ interestedUserId, targetUserId });
+            await Interest.deleteOne({ interestedUserId, targetUserId, status });
             const date = new Date();
             await Promise.all([
                 MyContacts.findOneAndUpdate(
@@ -585,8 +585,8 @@ exports.viewContact = async (req, res) => {
     // }
     try {
         const view = await ViewContact.findOneAndUpdate(
-            { viewContactUserId, viewContactTargetUserId, viewContactStatus },
-            { date: new Date() },
+            { viewContactUserId, viewContactTargetUserId },
+            { viewContactStatus, date: new Date() },
             { new: true, upsert: true }
         );
         res.status(200).json({ view });

@@ -154,6 +154,7 @@ exports.getUsersByFilter = async (req, res) => {
         const matchFilter = {
             gender: user.gender === "Male" ? "Female" : "Male", // Adjust based on your logic
             membershipPlan: "Paid",
+            expiryDate: { $gte: Date.now() }, // Check if the membership is still active
             status: "ACTIVE_USER",
         };
 
@@ -183,7 +184,7 @@ exports.getUnregister = async (req, res) => {
 
     try {
         const matchFilter = {
-            expiryDate: 0
+            expiryDate: { $lt: Date.now() }
         };
 
         // Count total number of new accounts
@@ -228,10 +229,11 @@ exports.searchByName = async (req, res) => {
 
         // Create the filter object dynamically
         let filter = {};
-        // if (!isAdmin) {
-        //     filter.membershipPlan = "Paid";
-        //     filter.status = "ACTIVE_USER";
-        // }
+        if (!isAdmin) {
+            filter.expiryDate = { $gte: Date.now() };
+            filter.membershipPlan = "Paid";
+            filter.status = "ACTIVE_USER";
+        }
         // Check if the name matches the userId pattern (e.g., KB4521, KG4589)
         if (userIdPattern.test(name)) {
             // If it matches the pattern, search by userId

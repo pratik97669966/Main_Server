@@ -220,42 +220,28 @@ const userIdPattern = /^[A-Z]{2}\d{4}$/;
 exports.searchByName = async (req, res) => {
     const searchData = req.body;
     const { name, gender, isAdmin = false } = searchData;
-
     try {
-        // Validate if name is passed in the query
         if (!name) {
             return res.status(400).json({ error: "Name parameter is required" });
         }
-
-        // Create the filter object dynamically
         let filter = {};
         if (!isAdmin) {
             filter.expiryDate = { $gte: Date.now() };
             filter.membershipPlan = { $in: ["Paid", "Active"] };
             filter.status = "ACTIVE_USER";
         }
-        // Check if the name matches the userId pattern (e.g., KB4521, KG4589)
         if (userIdPattern.test(name)) {
-            // If it matches the pattern, search by userId
-            filter.userId = name;
+            filter.userId = name.toUpperCase();
         } else {
-            // If it's a name, search by name (case-insensitive)
             filter.name = { $regex: name, $options: "i" };
         }
-
-        // If gender is provided, include it in the filter
         if (gender) {
             filter.gender = gender;
         }
-
-        // Perform the query using find and limit the results to 50 records
         const users = await User.find(filter).limit(50);  // Limit the results to 50 users for performance
-
-        // Return the whole user object for each result
         res.json(users);
 
     } catch (error) {
-        // Handle errors (e.g., database connection, query issues)
         res.status(500).json({ error: error.message });
     }
 };

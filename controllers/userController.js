@@ -231,7 +231,7 @@ exports.searchByName = async (req, res) => {
         let filter = {};
         if (!isAdmin) {
             filter.expiryDate = { $gte: Date.now() };
-            filter.membershipPlan = "Paid";
+            filter.membershipPlan = "Paid"||"Active";
             filter.status = "ACTIVE_USER";
         }
         // Check if the name matches the userId pattern (e.g., KB4521, KG4589)

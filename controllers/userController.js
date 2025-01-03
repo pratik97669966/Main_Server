@@ -129,7 +129,7 @@ exports.getUsersByGender = async (req, res) => {
 
     try {
         const users = await User.aggregate([
-            { $match: { gender, membershipPlan: "Paid" } },
+            { $match: { gender, membershipPlan: "Paid"||"Active" } },
             { $sample: { size: 50 } },
         ]);
         res.json(users);
@@ -153,7 +153,7 @@ exports.getUsersByFilter = async (req, res) => {
         // Step 2: Build the match filter dynamically based on the user's preferences
         const matchFilter = {
             gender: user.gender === "Male" ? "Female" : "Male", // Adjust based on your logic
-            membershipPlan: "Paid",
+            membershipPlan: "Paid"||"Active",
             expiryDate: { $gte: Date.now() }, // Check if the membership is still active
             status: "ACTIVE_USER",
         };

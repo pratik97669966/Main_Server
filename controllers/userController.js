@@ -129,7 +129,7 @@ exports.getUsersByGender = async (req, res) => {
 
     try {
         const users = await User.aggregate([
-            { $match: { gender, membershipPlan: "Paid"||"Active" } },
+            { $match: { gender, membershipPlan: { $in: ["Paid", "Active"] } } },
             { $sample: { size: 50 } },
         ]);
         res.json(users);
@@ -153,7 +153,7 @@ exports.getUsersByFilter = async (req, res) => {
         // Step 2: Build the match filter dynamically based on the user's preferences
         const matchFilter = {
             gender: user.gender === "Male" ? "Female" : "Male", // Adjust based on your logic
-            membershipPlan: "Paid"||"Active",
+            membershipPlan: { $in: ["Paid", "Active"] },
             expiryDate: { $gte: Date.now() }, // Check if the membership is still active
             status: "ACTIVE_USER",
         };
@@ -231,7 +231,7 @@ exports.searchByName = async (req, res) => {
         let filter = {};
         if (!isAdmin) {
             filter.expiryDate = { $gte: Date.now() };
-            filter.membershipPlan = "Paid"||"Active";
+            filter.membershipPlan = { $in: ["Paid", "Active"] };
             filter.status = "ACTIVE_USER";
         }
         // Check if the name matches the userId pattern (e.g., KB4521, KG4589)

@@ -215,11 +215,11 @@ exports.getUnregister = async (req, res) => {
 
 
 // API function for search by name
-const userIdPattern = /^[A-Z]{2}\d{4}$/;
-
 exports.searchByName = async (req, res) => {
     const searchData = req.body;
     const { name, gender, isAdmin = false } = searchData;
+    const userIdPattern = /^[A-Z]{2}\d{4}$/; 
+
     try {
         if (!name) {
             return res.status(400).json({ error: "Name parameter is required" });
@@ -230,7 +230,7 @@ exports.searchByName = async (req, res) => {
             filter.membershipPlan = { $in: ["Paid", "Active"] };
             filter.status = "ACTIVE_USER";
         }
-        if (userIdPattern.test(name)) {
+        if (userIdPattern.test(name.toUpperCase())) {
             filter.userId = name.toUpperCase();
         } else {
             filter.name = { $regex: name, $options: "i" };

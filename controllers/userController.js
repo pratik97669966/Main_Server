@@ -7,6 +7,8 @@ const Block = require('../models/Block');
 const MyContacts = require('../models/MyContacts');
 const ShortListed = require('../models/ShortListed');
 const ViewContact = require('../models/ViewContact');
+const mongoose = require('mongoose'); // Ensure Mongoose is imported
+
 // Utility Functions
 // Generate a unique user ID
 const generateUserId = async (prefix) => {
@@ -73,20 +75,26 @@ exports.setLastSeen = async (req, res) => {
     }
 };
 
-// Update an existing user
+// Update an existing user by MongoDB _id
 exports.updateUser = async (req, res) => {
     const userData = req.body;
-    const { userId } = userData;
+    const { _id } = userData;
 
-    if (!userId) {
-        return res.status(400).json({ message: 'userId is required for update' });
+    if (!_id) {
+        return res.status(400).json({ message: '_id is required for update' });
     }
 
     try {
+        // Validate if _id is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(_id)) {
+            return res.status(400).json({ message: 'Invalid _id format' });
+        }
+
+        // Update the user
         const user = await User.findOneAndUpdate(
-            { userId },
+            { _id }, // No need to convert _id, Mongoose handles it
             { $set: userData },
-            { new: true, upsert: false }
+            { new: true, upsert: false } // Return the updated document
         );
 
         if (!user) {
@@ -95,9 +103,11 @@ exports.updateUser = async (req, res) => {
 
         res.json(user);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 };
+
+
 
 // Get a user by userId
 exports.getUserById = async (req, res) => {
@@ -217,32 +227,85 @@ exports.getUnregister = async (req, res) => {
 // API function for search by name
 exports.searchByName = async (req, res) => {
     const searchData = req.body;
-    const { name, gender, isAdmin = false } = searchData;
-    const userIdPattern = /^[A-Z]{2}\d{4}$/; 
+    const {
+        isAdmin = false,
+        isAdvancedSearch = false,
+        name,
+        gender,
+        lookingFor,
+        partnerAgeRange,
+        partnerHeightRange,
+        partnerIncomeRange,
+        partnerComplexion,
+        partnerDiet,
+        expectedEducation,
+        partnerOccupation,
+        partnerReligion,
+        partnerCaste,
+        partnerSubCaste,
+        readyToMarryInSameCaste,
+        partnerCountryLivingIn,
+        partnerState,
+        preferredWorkingCities,
+        preferredNativeCities,
+        partnerExpectations
+    } = searchData;
+    const userIdPattern = /^[A-Z]{2}\d{4}$/; // Define the pattern for userId
 
     try {
-        if (!name) {
-            return res.status(400).json({ error: "Name parameter is required" });
-        }
         let filter = {};
         if (!isAdmin) {
             filter.expiryDate = { $gte: Date.now() };
             filter.membershipPlan = { $in: ["Paid", "Active"] };
             filter.status = "ACTIVE_USER";
         }
-        if (userIdPattern.test(name.toUpperCase())) {
-            filter.userId = name.toUpperCase();
-        } else {
-            filter.name = { $regex: name, $options: "i" };
-        }
         if (gender) {
             filter.gender = gender;
         }
-        const users = await User.find(filter).limit(50);  // Limit the results to 50 users for performance
-        res.json(users);
+        if (isAdvancedSearch) {
+            if (lookingFor) filter.maritalStatus = lookingFor;
+            if (partnerAgeRange) {
+                const ages = partnerAgeRange.split("To").map(it => it.replace("From", "").trim());
+                if (ages.length === 2) {
+                    const currentYear = moment().year();
+                    const fromDate = moment().subtract(ages[1], 'years').startOf('year').toDate();
+                    const toDate = moment().subtract(ages[0], 'years').endOf('year').toDate();
+                    filter.dateOfBirth = { $gte: fromDate, $lte: toDate };
+                }
+            }
+            if (partnerHeightRange) {
+                const heights = partnerHeightRange.split("To").map(it => it.replace("From", "").trim());
+                if (heights.length === 2) {
+                    filter.height = { $gte: heights[0], $lte: heights[1] };
+                }
+            }
+            if (expectedEducation) filter.education = expectedEducation;
+            if (partnerOccupation) filter.occupation = partnerOccupation;
+            if (partnerReligion) filter.religion = partnerReligion;
+            if (partnerCaste) filter.caste = partnerCaste;
+            if (partnerSubCaste) filter.subCaste = partnerSubCaste;
+            if (readyToMarryInSameCaste) filter.readyToMarryInSameCaste = readyToMarryInSameCaste;
+            if (partnerCountryLivingIn) filter.partnerCountryLivingIn = partnerCountryLivingIn;
+            if (partnerState) filter.partnerState = partnerState;
+            if (preferredWorkingCities) filter.preferredWorkingCities = preferredWorkingCities;
+            if (preferredNativeCities) filter.preferredNativeCities = preferredNativeCities;
+        } else {
+            if (!name) {
+                return res.status(400).json({ error: "Name parameter is required" });
+            }
 
+            if (userIdPattern.test(name.toUpperCase())) {
+                filter.userId = name.toUpperCase();
+            } else {
+                filter.name = { $regex: name, $options: "i" };
+            }
+            
+        }
+        const users = await User.find(filter).exec();
+        res.status(200).json(users);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error searching users by name:", error.message);
+        res.status(500).json({ error: "An error occurred while fetching data." });
     }
 };
 

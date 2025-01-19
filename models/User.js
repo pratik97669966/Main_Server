@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
   subCaste: String,
   maritalStatus: String,
   dateOfBirth: String,
+  dateOfBirthValue: Number,
   age: String,
   email: String,
   password: String,
@@ -138,6 +139,7 @@ const userSchema = new mongoose.Schema({
   // Hobbies and Interests
   hobbies: String,
   interests: String,
+  basicDetailsExtra: String,
 
   isProfileBlur: Boolean,
   isHoroscopeVisible: Boolean,

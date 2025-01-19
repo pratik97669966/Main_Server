@@ -267,7 +267,16 @@ exports.searchByName = async (req, res) => {
 
             // Marital Status
             if (lookingFor && lookingFor != 'All') filter.maritalStatus = lookingFor;
-
+            if (partnerAgeRange) {
+                const ages = partnerAgeRange.split("To").map(it => it.replace("From", "").trim());
+                if (ages.length === 2) {
+                    // Convert to milliseconds
+                    const fromDateMillis = moment().subtract(ages[1], 'years').startOf('year').valueOf();  // Convert to milliseconds
+                    const toDateMillis = moment().subtract(ages[0], 'years').endOf('year').valueOf();      // Convert to milliseconds
+            
+                    filter.dateOfBirthValue = { $gte: fromDateMillis, $lte: toDateMillis };
+                }
+            }            
             // Partner Height
             if (partnerHeightRange) {
                 const heights = partnerHeightRange
@@ -332,8 +341,6 @@ exports.searchByName = async (req, res) => {
             if (partnerCountryLivingIn) filter.country = partnerCountryLivingIn;
             if (partnerState) filter.state = partnerState;
 
-            // Debugging the filter
-            console.log("Final MongoDB Filter:", JSON.stringify(filter, null, 2));
         }
         else {
             if (!name) {

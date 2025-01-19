@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const { NewUser } = require('./models/NewUser.js');
+const User = require('./models/User.js');
 
 const app = express();
 const PORT = process.env.PORT || 3030;
@@ -267,8 +268,57 @@ const migrateData = async () => {
         console.error('Data migration error:', err);
     }
 };
+// const migrateData = async () => {
+//     try {
+//         const rawData = fs.readFileSync('./oldData.json'); // Adjust the path as needed
+//         const oldUsers = JSON.parse(rawData);
 
-migrateData();
+//         for (const oldUser of oldUsers) {
+//             const userId = oldUser.MatriID || null;
+//             const basicDetailsExtra = removeHtmlTags(oldUser.Basic_Details_Extra || "");
+//             const dateOfBirth = oldUser.dateOfBirth || "";
+//             const dateOfBirthValue = dateOfBirth ? new Date(dateOfBirth).getTime() : null;
+
+//             if (userId) {
+//                 if (oldUser.Mobile.length == 10) {
+//                     await User.findOneAndUpdate(
+//                         { userId },
+//                         { $set: { basicDetailsExtra: basicDetailsExtra, dateOfBirthValue: dateOfBirthValue } },
+//                         { new: true, upsert: false }
+//                     );
+//                 }
+//             }
+//         }
+
+//         console.log('Migration and JSON generation complete.');
+//     } catch (err) {
+//         console.error('Data migration error:', err);
+//     }
+// };
+const migrateData2 = async () => {
+    try {
+        const users = await User.find({}); // Fetch all users from MongoDB
+
+        for (const user of users) {
+            const userId = user.userId || null;
+            const dateOfBirth = user.dateOfBirth || "";
+            const dateOfBirthValue = dateOfBirth ? new Date(dateOfBirth).getTime() : null;
+            console.log('dateOfBirthValue:' + userId, dateOfBirthValue);
+            if (userId) {
+                    await User.findOneAndUpdate(
+                        { userId },
+                        { $set: {dateOfBirthValue: dateOfBirthValue } },
+                        { new: true, upsert: false }
+                    );
+            }
+        }
+
+        console.log('Migration and JSON generation complete.');
+    } catch (err) {
+        console.error('Data migration error:', err);
+    }
+};
+// migrateData();
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

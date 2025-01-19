@@ -15,6 +15,7 @@ dotenv.config();
 const app = express();
 // Connect to MongoDB
 connectDB();
+
 // Configure AWS S3
 AWS.config.update({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -99,7 +100,7 @@ app.post('/upload/image', upload.single('image'), async (req, res) => {
             url: data.Location, // S3 file URL
         });
     } catch (error) {
-        console.error('Error uploading file:', error.message);
+        console.error('Error uploading file:', error); // Log the full error object
         res.status(500).json({ error: 'Failed to upload file' });
     }
 });
@@ -111,7 +112,7 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // Start the server
-const PORT = process.env.PORT || 3030;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });

@@ -264,13 +264,12 @@ exports.searchByName = async (req, res) => {
             }
         }
         if (isAdvancedSearch) {
-            // Initialize filters
             filter = {};
 
-            // Single value filter
+            // Marital Status
             if (lookingFor) filter.maritalStatus = lookingFor;
 
-            // Partner height range filter
+            // Partner Height
             if (partnerHeightRange) {
                 const heights = partnerHeightRange
                     .split("To")
@@ -280,83 +279,62 @@ exports.searchByName = async (req, res) => {
                 }
             }
 
-            // Expected education filter
-            if (expectedEducation) {
-                const educationArray = expectedEducation
-                    .split(",")
-                    .map(it => it.trim());
+            // Education
+            if (expectedEducation && expectedEducation !== "Any") {
+                const educationArray = expectedEducation.split(",").map(it => it.trim());
                 if (educationArray.length > 0) {
-                    filter.education = { $in: educationArray }; // Match any education
+                    filter.education = {
+                        $in: educationArray.map(value => new RegExp(`^${value}$`, 'i'))
+                    };
                 }
             }
 
-            // Occupation filter
-            if (partnerOccupation) {
-                const occupationArray = partnerOccupation
-                    .split(",")
-                    .map(it => it.trim());
+            // Occupation
+            if (partnerOccupation && partnerOccupation !== "Any") {
+                const occupationArray = partnerOccupation.split(",").map(it => it.trim());
                 if (occupationArray.length > 0) {
-                    filter.occupation = { $in: occupationArray }; // Match any occupation
+                    filter.occupation = {
+                        $in: occupationArray.map(value => new RegExp(`^${value}$`, 'i'))
+                    };
                 }
             }
 
-            // Caste filter
+            // Caste
             if (partnerCaste) {
-                const casteArray = partnerCaste
-                    .split(",")
-                    .map(it => it.trim());
+                const casteArray = partnerCaste.split(",").map(it => it.trim());
                 if (casteArray.length > 0) {
-                    filter.caste = { $in: casteArray }; // Match any caste
+                    filter.caste = {
+                        $in: casteArray.map(value => new RegExp(`^${value}$`, 'i'))
+                    };
                 }
             }
 
-            // Sub-caste filter
+            // Sub-caste
             if (partnerSubCaste) {
-                const subCasteArray = partnerSubCaste
-                    .split(",")
-                    .map(it => it.trim());
+                const subCasteArray = partnerSubCaste.split(",").map(it => it.trim());
                 if (subCasteArray.length > 0) {
-                    filter.subCaste = { $in: subCasteArray }; // Match any sub-caste
+                    filter.subCaste = {
+                        $in: subCasteArray.map(value => new RegExp(`^${value}$`, 'i'))
+                    };
                 }
             }
 
-            // Ready to marry in the same caste filter
+            // Ready to marry in the same caste
             if (readyToMarryInSameCaste) {
-                const sameCasteArray = readyToMarryInSameCaste
-                    .split(",")
-                    .map(it => it.trim());
+                const sameCasteArray = readyToMarryInSameCaste.split(",").map(it => it.trim());
                 if (sameCasteArray.length > 0) {
-                    filter.readyToMarryInSameCaste = { $in: sameCasteArray }; // Match any option
+                    filter.readyToMarryInSameCaste = {
+                        $in: sameCasteArray.map(value => new RegExp(`^${value}$`, 'i'))
+                    };
                 }
             }
 
-            // Country filter
+            // Country and State
             if (partnerCountryLivingIn) filter.country = partnerCountryLivingIn;
-
-            // State filter
             if (partnerState) filter.state = partnerState;
 
-            // Preferred working cities filter
-            if (preferredWorkingCities) {
-                const citiesArray = preferredWorkingCities
-                    .split(",")
-                    .map(it => it.trim());
-                if (citiesArray.length > 0) {
-                    filter.workingLocationCity = { $in: citiesArray }; // Match any city
-                }
-            }
-
-            // Preferred native cities filter
-            if (preferredNativeCities) {
-                const nativeCitiesArray = preferredNativeCities
-                    .split(",")
-                    .map(it => it.trim());
-                if (nativeCitiesArray.length > 0) {
-                    filter.nativeCity = { $in: nativeCitiesArray }; // Match any native city
-                }
-            }
-
-            console.log("Filter object:", filter);
+            // Debugging the filter
+            console.log("Final MongoDB Filter:", JSON.stringify(filter, null, 2));
         }
         else {
             if (!name) {

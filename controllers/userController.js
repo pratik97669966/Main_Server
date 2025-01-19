@@ -275,7 +275,7 @@ exports.searchByName = async (req, res) => {
                 }
             }
             if (partnerHeightRange) {
-                const heights = partnerHeightRange.split("To").map(it => it.replace("From", "").trim());
+                const heights = partnerHeightRange.split("To").map(it => it.replace("From", "").replace("\u0027","'").trim());
                 if (heights.length === 2) {
                     const heightFrom = convertHeightToInches(heights[0]);
                     const heightTo = convertHeightToInches(heights[1]);
@@ -283,7 +283,7 @@ exports.searchByName = async (req, res) => {
                 }
             }
             if (expectedEducation && expectedEducation != 'any') filter.education = expectedEducation;
-            if (partnerOccupation) filter.occupation = partnerOccupation;
+            if (partnerOccupation && partnerOccupation != 'any') filter.occupation = partnerOccupation;
             if (partnerReligion) filter.religion = partnerReligion;
             if (partnerCaste) filter.caste = partnerCaste;
             if (partnerSubCaste) filter.subCaste = partnerSubCaste;
@@ -310,7 +310,10 @@ exports.searchByName = async (req, res) => {
     }
 };
 
-
+function convertHeightToInches(height) {
+    const [feet, inches] = height.split("'").map(part => part.trim());
+    return parseInt(feet) * 12 + parseInt(inches);
+}
 
 // Delete a user by userId
 exports.deleteUser = async (req, res) => {

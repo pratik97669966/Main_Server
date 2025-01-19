@@ -281,8 +281,8 @@ exports.searchByName = async (req, res) => {
                     filter.height = { $gte: heights[0], $lte: heights[1] };
                 }
             }
-            if (expectedEducation && expectedEducation != 'any') filter.education = expectedEducation;
-            if (partnerOccupation && partnerOccupation != 'any') filter.occupation = partnerOccupation;
+            if (expectedEducation && expectedEducation != 'Any') filter.education = expectedEducation;
+            if (partnerOccupation && partnerOccupation != 'Any') filter.occupation = partnerOccupation;
             if (partnerReligion) filter.religion = partnerReligion;
             if (partnerCaste) filter.caste = partnerCaste;
             if (partnerSubCaste) filter.subCaste = partnerSubCaste;

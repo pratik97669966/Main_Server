@@ -7,7 +7,7 @@ const errorHandler = require('./middleware/errorHandler'); // If using
 const path = require('path');
 const multer = require('multer');
 const AWS = require('aws-sdk');
-
+const sharp = require('sharp');
 
 // Load environment variables
 dotenv.config();
@@ -16,16 +16,20 @@ const app = express();
 // Connect to MongoDB
 connectDB();
 // Configure AWS S3
-const s3 = new AWS.S3({
+AWS.config.update({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     region: process.env.AWS_REGION,
 });
+
+const s3 = new AWS.S3();
+
 // Middleware
 app.use(bodyParser.json());
-// Configure Multer for file uploads
-const storage = multer.memoryStorage(); // Store files in memory
-const upload = multer({ storage });
+// Configure Multer for file uploads with a file size limit (e.g., 5MB)
+const upload = multer({
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB size limit
+});
 
 // Routes
 app.use('/', userRoutes); // Prefix routes with /api
@@ -74,11 +78,17 @@ app.post('/upload/image', upload.single('image'), async (req, res) => {
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
+        // Compress the image using sharp
+        const compressedImageBuffer = await sharp(file.buffer)
+            .resize({ width: 800 }) // Resize to a width of 800px (maintaining aspect ratio)
+            .jpeg({ quality: 80 }) // Compress to JPEG with 80% quality
+            .toBuffer();
+
         const s3Params = {
             Bucket: process.env.S3_BUCKET_NAME,
             Key: `${Date.now()}_${file.originalname}`,
-            Body: file.buffer,
-            ContentType: file.mimetype,
+            Body: compressedImageBuffer,
+            ContentType: 'image/jpeg',
         };
 
         // Upload to S3
@@ -89,7 +99,7 @@ app.post('/upload/image', upload.single('image'), async (req, res) => {
             url: data.Location, // S3 file URL
         });
     } catch (error) {
-        console.error('Error uploading file:', error);
+        console.error('Error uploading file:', error.message);
         res.status(500).json({ error: 'Failed to upload file' });
     }
 });

@@ -11,7 +11,7 @@ router.get('/users', userController.getAllUsers); // Get all users
 router.get('/users/gender/:gender', userController.getUsersByGender); // Get users by gender
 router.get('/matches/:userId/:gender/:lookingfor', userController.getUsersByFilter); // Get user matches
 router.delete('/user/:userId', userController.deleteUser); // Delete a user
-// Search User
+// Search upload/imageUser
 router.post('/searchbyname', userController.searchByName); // Search By Name
 // Unregister user
 router.get('/unregister', userController.getUnregister); // Search By Name

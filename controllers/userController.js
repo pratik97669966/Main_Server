@@ -266,7 +266,7 @@ exports.searchByName = async (req, res) => {
         if (isAdvancedSearch) {
 
             // Marital Status
-            if (lookingFor) filter.maritalStatus = lookingFor;
+            if (lookingFor && lookingFor != 'All') filter.maritalStatus = lookingFor;
 
             // Partner Height
             if (partnerHeightRange) {

@@ -86,11 +86,6 @@ exports.updateUser = async (req, res) => {
     }
 
     try {
-        // Validate if _id is a valid ObjectId
-        if (!mongoose.Types.ObjectId.isValid(userId)) {
-            return res.status(400).json({ message: 'Invalid userId format' });
-        }
-
         // Update the user
         const user = await User.findOneAndUpdate(
             { userId }, // No need to convert _id, Mongoose handles it

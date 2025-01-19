@@ -264,34 +264,101 @@ exports.searchByName = async (req, res) => {
             }
         }
         if (isAdvancedSearch) {
+            // Initialize filters
+            filter = {};
+
+            // Single value filter
             if (lookingFor) filter.maritalStatus = lookingFor;
-            // if (partnerAgeRange) {
-            //     const ages = partnerAgeRange.split("To").map(it => it.replace("From", "").trim());
-            //     if (ages.length === 2) {
-            //         const fromDate = moment().subtract(ages[1], 'years').startOf('year').toDate(); // Oldest
-            //         const toDate = moment().subtract(ages[0], 'years').endOf('year').toDate();   // Youngest
-            //         console.log('From ' + fromDate);
-            //         console.log('To ' + toDate);
-            //         filter.dateOfBirth = { $gte: fromDate, $lte: toDate };
-            //     }
-            // }
+
+            // Partner height range filter
             if (partnerHeightRange) {
-                const heights = partnerHeightRange.split("To").map(it => it.replace("From", "").replace("\u0027", "'").trim());
+                const heights = partnerHeightRange
+                    .split("To")
+                    .map(it => it.replace("From", "").replace("\u0027", "'").trim());
                 if (heights.length === 2) {
                     filter.height = { $gte: heights[0], $lte: heights[1] };
                 }
             }
-            if (expectedEducation && expectedEducation != 'Any') filter.education = expectedEducation;
-            if (partnerOccupation && partnerOccupation != 'Any') filter.occupation = partnerOccupation;
-            if (partnerReligion) filter.religion = partnerReligion;
-            if (partnerCaste) filter.caste = partnerCaste;
-            if (partnerSubCaste) filter.subCaste = partnerSubCaste;
-            if (readyToMarryInSameCaste) filter.readyToMarryInSameCaste = readyToMarryInSameCaste;
+
+            // Expected education filter
+            if (expectedEducation) {
+                const educationArray = expectedEducation
+                    .split(",")
+                    .map(it => it.trim());
+                if (educationArray.length > 0) {
+                    filter.education = { $in: educationArray }; // Match any education
+                }
+            }
+
+            // Occupation filter
+            if (partnerOccupation) {
+                const occupationArray = partnerOccupation
+                    .split(",")
+                    .map(it => it.trim());
+                if (occupationArray.length > 0) {
+                    filter.occupation = { $in: occupationArray }; // Match any occupation
+                }
+            }
+
+            // Caste filter
+            if (partnerCaste) {
+                const casteArray = partnerCaste
+                    .split(",")
+                    .map(it => it.trim());
+                if (casteArray.length > 0) {
+                    filter.caste = { $in: casteArray }; // Match any caste
+                }
+            }
+
+            // Sub-caste filter
+            if (partnerSubCaste) {
+                const subCasteArray = partnerSubCaste
+                    .split(",")
+                    .map(it => it.trim());
+                if (subCasteArray.length > 0) {
+                    filter.subCaste = { $in: subCasteArray }; // Match any sub-caste
+                }
+            }
+
+            // Ready to marry in the same caste filter
+            if (readyToMarryInSameCaste) {
+                const sameCasteArray = readyToMarryInSameCaste
+                    .split(",")
+                    .map(it => it.trim());
+                if (sameCasteArray.length > 0) {
+                    filter.readyToMarryInSameCaste = { $in: sameCasteArray }; // Match any option
+                }
+            }
+
+            // Country filter
             if (partnerCountryLivingIn) filter.country = partnerCountryLivingIn;
+
+            // State filter
             if (partnerState) filter.state = partnerState;
-            if (preferredWorkingCities) filter.workingLocationCity = preferredWorkingCities;
-            if (preferredNativeCities) filter.nativeCity = preferredNativeCities;
-        } else {
+
+            // Preferred working cities filter
+            if (preferredWorkingCities) {
+                const citiesArray = preferredWorkingCities
+                    .split(",")
+                    .map(it => it.trim());
+                if (citiesArray.length > 0) {
+                    filter.workingLocationCity = { $in: citiesArray }; // Match any city
+                }
+            }
+
+            // Preferred native cities filter
+            if (preferredNativeCities) {
+                const nativeCitiesArray = preferredNativeCities
+                    .split(",")
+                    .map(it => it.trim());
+                if (nativeCitiesArray.length > 0) {
+                    filter.nativeCity = { $in: nativeCitiesArray }; // Match any native city
+                }
+            }
+
+            console.log("Filter object:", filter);
+        }
+        else {
             if (!name) {
                 return res.status(400).json({ error: "Name parameter is required" });
             }

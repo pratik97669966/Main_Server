@@ -264,7 +264,6 @@ exports.searchByName = async (req, res) => {
             }
         }
         if (isAdvancedSearch) {
-            filter = {};
 
             // Marital Status
             if (lookingFor) filter.maritalStatus = lookingFor;

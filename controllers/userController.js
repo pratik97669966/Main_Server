@@ -8,6 +8,7 @@ const MyContacts = require('../models/MyContacts');
 const ShortListed = require('../models/ShortListed');
 const ViewContact = require('../models/ViewContact');
 const mongoose = require('mongoose'); // Ensure Mongoose is imported
+const moment = require('moment');
 
 // Utility Functions
 // Generate a unique user ID
@@ -276,10 +277,12 @@ exports.searchByName = async (req, res) => {
             if (partnerHeightRange) {
                 const heights = partnerHeightRange.split("To").map(it => it.replace("From", "").trim());
                 if (heights.length === 2) {
-                    filter.height = { $gte: heights[0], $lte: heights[1] };
+                    const heightFrom = convertHeightToInches(heights[0]);
+                    const heightTo = convertHeightToInches(heights[1]);
+                    filter.height = { $gte: heightFrom, $lte: heightTo };
                 }
             }
-            if (expectedEducation) filter.education = expectedEducation;
+            if (expectedEducation && expectedEducation != 'any') filter.education = expectedEducation;
             if (partnerOccupation) filter.occupation = partnerOccupation;
             if (partnerReligion) filter.religion = partnerReligion;
             if (partnerCaste) filter.caste = partnerCaste;

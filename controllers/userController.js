@@ -273,10 +273,9 @@ exports.searchByName = async (req, res) => {
                     // Convert to milliseconds
                     const fromDateMillis = moment().subtract(ages[1], 'years').startOf('year').valueOf();  // Convert to milliseconds
                     const toDateMillis = moment().subtract(ages[0], 'years').endOf('year').valueOf();      // Convert to milliseconds
-            
                     filter.dateOfBirthValue = { $gte: fromDateMillis, $lte: toDateMillis };
                 }
-            }            
+            }
             // Partner Height
             if (partnerHeightRange) {
                 const heights = partnerHeightRange

@@ -303,13 +303,15 @@ const migrateData2 = async () => {
             const userId = user.userId || null;
             const dateOfBirth = user.dateOfBirth || "";
             const dateOfBirthValue = dateOfBirth ? new Date(dateOfBirth).getTime() : null;
-            console.log('dateOfBirthValue:' + userId, dateOfBirthValue);
+            const unwantedUrl = "https://kartavyavivahbandhanstorage.s3.ap-south-1.amazonaws.com/nophoto.jpg";
+            const profilePictureUrls = user.profilePictureUrls.filter(url => url !== unwantedUrl);
+
             if (userId) {
-                    await User.findOneAndUpdate(
-                        { userId },
-                        { $set: {dateOfBirthValue: dateOfBirthValue } },
-                        { new: true, upsert: false }
-                    );
+                await User.findOneAndUpdate(
+                    { userId },
+                    { $set: { profilePictureUrls: profilePictureUrls } },
+                    { new: true, upsert: false }
+                );
             }
         }
 
@@ -318,6 +320,9 @@ const migrateData2 = async () => {
         console.error('Data migration error:', err);
     }
 };
+
+// Call the migrateData2 function
+migrateData2();
 // migrateData();
 
 app.listen(PORT, () => {

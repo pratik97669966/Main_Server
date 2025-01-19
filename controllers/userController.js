@@ -79,21 +79,21 @@ exports.setLastSeen = async (req, res) => {
 // Update an existing user by MongoDB _id
 exports.updateUser = async (req, res) => {
     const userData = req.body;
-    const { _id } = userData;
+    const { userId } = userData;
 
-    if (!_id) {
-        return res.status(400).json({ message: '_id is required for update' });
+    if (!userId) {
+        return res.status(400).json({ message: 'userId is required for update' });
     }
 
     try {
         // Validate if _id is a valid ObjectId
-        if (!mongoose.Types.ObjectId.isValid(_id)) {
-            return res.status(400).json({ message: 'Invalid _id format' });
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'Invalid userId format' });
         }
 
         // Update the user
         const user = await User.findOneAndUpdate(
-            { _id }, // No need to convert _id, Mongoose handles it
+            { userId }, // No need to convert _id, Mongoose handles it
             { $set: userData },
             { new: true, upsert: false } // Return the updated document
         );

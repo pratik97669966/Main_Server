@@ -265,21 +265,20 @@ exports.searchByName = async (req, res) => {
         }
         if (isAdvancedSearch) {
             if (lookingFor) filter.maritalStatus = lookingFor;
-            if (partnerAgeRange) {
-                const ages = partnerAgeRange.split("To").map(it => it.replace("From", "").trim());
-                if (ages.length === 2) {
-                    const currentYear = moment().year();
-                    const fromDate = moment().subtract(ages[1], 'years').startOf('year').toDate();
-                    const toDate = moment().subtract(ages[0], 'years').endOf('year').toDate();
-                    filter.dateOfBirth = { $gte: fromDate, $lte: toDate };
-                }
-            }
+            // if (partnerAgeRange) {
+            //     const ages = partnerAgeRange.split("To").map(it => it.replace("From", "").trim());
+            //     if (ages.length === 2) {
+            //         const fromDate = moment().subtract(ages[1], 'years').startOf('year').toDate(); // Oldest
+            //         const toDate = moment().subtract(ages[0], 'years').endOf('year').toDate();   // Youngest
+            //         console.log('From ' + fromDate);
+            //         console.log('To ' + toDate);
+            //         filter.dateOfBirth = { $gte: fromDate, $lte: toDate };
+            //     }
+            // }
             if (partnerHeightRange) {
-                const heights = partnerHeightRange.split("To").map(it => it.replace("From", "").replace("\u0027","'").trim());
+                const heights = partnerHeightRange.split("To").map(it => it.replace("From", "").replace("\u0027", "'").trim());
                 if (heights.length === 2) {
-                    const heightFrom = convertHeightToInches(heights[0]);
-                    const heightTo = convertHeightToInches(heights[1]);
-                    filter.height = { $gte: heightFrom, $lte: heightTo };
+                    filter.height = { $gte: heights[0], $lte: heights[1] };
                 }
             }
             if (expectedEducation && expectedEducation != 'any') filter.education = expectedEducation;

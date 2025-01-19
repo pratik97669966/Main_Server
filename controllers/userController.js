@@ -258,9 +258,9 @@ exports.searchByName = async (req, res) => {
             filter.expiryDate = { $gte: Date.now() };
             filter.membershipPlan = { $in: ["Paid", "Active"] };
             filter.status = "ACTIVE_USER";
-        }
-        if (gender) {
-            filter.gender = gender;
+            if (gender) {
+                filter.gender = gender;
+            }
         }
         if (isAdvancedSearch) {
             if (lookingFor) filter.maritalStatus = lookingFor;
@@ -285,21 +285,19 @@ exports.searchByName = async (req, res) => {
             if (partnerCaste) filter.caste = partnerCaste;
             if (partnerSubCaste) filter.subCaste = partnerSubCaste;
             if (readyToMarryInSameCaste) filter.readyToMarryInSameCaste = readyToMarryInSameCaste;
-            if (partnerCountryLivingIn) filter.partnerCountryLivingIn = partnerCountryLivingIn;
-            if (partnerState) filter.partnerState = partnerState;
-            if (preferredWorkingCities) filter.preferredWorkingCities = preferredWorkingCities;
-            if (preferredNativeCities) filter.preferredNativeCities = preferredNativeCities;
+            if (partnerCountryLivingIn) filter.country = partnerCountryLivingIn;
+            if (partnerState) filter.state = partnerState;
+            if (preferredWorkingCities) filter.workingLocationCity = preferredWorkingCities;
+            if (preferredNativeCities) filter.nativeCity = preferredNativeCities;
         } else {
             if (!name) {
                 return res.status(400).json({ error: "Name parameter is required" });
             }
-
             if (userIdPattern.test(name.toUpperCase())) {
                 filter.userId = name.toUpperCase();
             } else {
                 filter.name = { $regex: name, $options: "i" };
             }
-            
         }
         const users = await User.find(filter).exec();
         res.status(200).json(users);

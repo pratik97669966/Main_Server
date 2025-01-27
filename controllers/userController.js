@@ -29,10 +29,10 @@ const generateUserId = async (userData) => {
         }
     }
 
-    let sequence = await Sequence.findOne({ prefix:'user' });
+    let sequence = await Sequence.findOne({ prefix: 'user' });
 
     if (!sequence) {
-        sequence = new Sequence({ prefix:'user', sequence: 0 });
+        sequence = new Sequence({ prefix: 'user', sequence: 0 });
     }
 
     sequence.sequence += 1;
@@ -55,8 +55,9 @@ exports.createNewUser = async (req, res) => {
 
         // Ensure activationDate is explicitly in milliseconds
         const activationDate = Date.now(); // Current time in milliseconds
-
-        const user = new User({ ...userData, userId, activationDate });
+        const dateOfBirth = userData.dateOfBirth || "";
+        const dateOfBirthValue = dateOfBirth ? new Date(dateOfBirth).getTime() : null;
+        const user = new User({ ...userData, userId, activationDate, dateOfBirthValue });
         await user.save();
 
         res.status(201).json(user);
@@ -92,7 +93,6 @@ exports.setLastSeen = async (req, res) => {
     }
 };
 
-// Update an existing user by MongoDB _id
 exports.updateUser = async (req, res) => {
     const userData = req.body;
     const { userId } = userData;
@@ -103,6 +103,11 @@ exports.updateUser = async (req, res) => {
 
     try {
         // Update the user
+        const dateOfBirth = userData.dateOfBirth || "";
+        if (dateOfBirth) {
+            const dateOfBirthValue = new Date(dateOfBirth).getTime();
+            userData.dateOfBirthValue = dateOfBirthValue;
+        }
         const user = await User.findOneAndUpdate(
             { userId }, // No need to convert _id, Mongoose handles it
             { $set: userData },
@@ -119,7 +124,40 @@ exports.updateUser = async (req, res) => {
     }
 };
 
+exports.updateUserById = async (req, res) => {
+    const userData = req.body;
+    const { _id } = userData;
 
+    if (!_id) {
+        return res.status(400).json({ message: 'userId is required for update' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(_id)) {
+        return res.status(400).json({ message: 'Invalid userId' });
+    }
+
+    try {
+        // Update the user
+        if (dateOfBirth) {
+            const dateOfBirthValue = new Date(dateOfBirth).getTime();
+            userData.dateOfBirthValue = dateOfBirthValue;
+        }
+        const user = await User.findOneAndUpdate(
+            { _id }, // No need to convert _id, Mongoose handles it
+            { $set: userData },
+            { new: true, upsert: false } // Return the updated document
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ error: 'Failed to update user' });
+    }
+};
 
 // Get a user by userId
 exports.getUserById = async (req, res) => {

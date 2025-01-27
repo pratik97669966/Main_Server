@@ -5,6 +5,7 @@ const userController = require('../controllers/userController');
 // User Management
 router.post('/user', userController.createNewUser); // Create a new user
 router.put('/user', userController.updateUser); // Update a user's information
+router.put('/userById', userController.updateUserById); // Update a user's information
 router.get('/user/:userId', userController.getUserById); // Get user by ID
 router.get('/user/last/seen/:userId', userController.setLastSeen); // Set user last seen
 router.get('/users', userController.getAllUsers); // Get all users

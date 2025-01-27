@@ -300,8 +300,7 @@ exports.searchByName = async (req, res) => {
         preferredNativeCities,
         partnerExpectations
     } = searchData;
-    const userIdPattern = /^[A-Z]{2}\d{4}$/; // Define the pattern for userId
-
+    const userIdPattern = /^(KG|KOG|KB|KOB)\d{4}$/; // Define the pattern for userId
     try {
         let filter = {};
         if (!isAdmin) {

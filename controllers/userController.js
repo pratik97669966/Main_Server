@@ -95,7 +95,7 @@ exports.setLastSeen = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     const userData = req.body;
-    const { userId } = userData;
+    const { userId, dateOfBirth } = userData;
 
     if (!userId) {
         return res.status(400).json({ message: 'userId is required for update' });
@@ -126,7 +126,7 @@ exports.updateUser = async (req, res) => {
 
 exports.updateUserById = async (req, res) => {
     const userData = req.body;
-    const { _id } = userData;
+    const { _id, dateOfBirth } = userData;
 
     if (!_id) {
         return res.status(400).json({ message: 'userId is required for update' });

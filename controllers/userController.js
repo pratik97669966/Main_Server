@@ -12,17 +12,33 @@ const moment = require('moment');
 
 // Utility Functions
 // Generate a unique user ID
-const generateUserId = async (prefix) => {
-    let sequence = await Sequence.findOne({ prefix: 'user' });
+const generateUserId = async (userData) => {
+    let prefix = '';
+
+    if (userData.gender === 'Female') {
+        if (userData.maritalStatus === 'Unmarried') {
+            prefix = 'KG';
+        } else if (['Divorced', 'Widowed', 'Widower'].includes(userData.maritalStatus)) {
+            prefix = 'KOG';
+        }
+    } else if (userData.gender === 'Male') {
+        if (userData.maritalStatus === 'Unmarried') {
+            prefix = 'KB';
+        } else if (['Divorced', 'Widowed', 'Widower'].includes(userData.maritalStatus)) {
+            prefix = 'KOB';
+        }
+    }
+
+    let sequence = await Sequence.findOne({ prefix:'user' });
 
     if (!sequence) {
-        sequence = new Sequence({ prefix, sequence: 0 });
+        sequence = new Sequence({ prefix:'user', sequence: 0 });
     }
 
     sequence.sequence += 1;
     await sequence.save();
 
-    return `${prefix}${String(sequence.sequence).padStart(4, '0')}`; // e.g., lastUser00001
+    return `${prefix}${String(sequence.sequence).padStart(4, '0')}`;
 };
 
 // User Management
@@ -35,7 +51,7 @@ exports.createNewUser = async (req, res) => {
             return res.status(400).json({ message: 'Prefix is required' });
         }
 
-        const userId = await generateUserId(prefix);
+        const userId = await generateUserId(userData);
 
         // Ensure activationDate is explicitly in milliseconds
         const activationDate = Date.now(); // Current time in milliseconds

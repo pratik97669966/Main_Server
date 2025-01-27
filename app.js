@@ -81,8 +81,8 @@ app.post('/upload/image', upload.single('image'), async (req, res) => {
 
         // Compress the image using sharp
         const compressedImageBuffer = await sharp(file.buffer)
-            .resize({ width: 800 }) // Resize to a width of 800px (maintaining aspect ratio)
-            .jpeg({ quality: 80 }) // Compress to JPEG with 80% quality
+            .resize({ width: 800 })
+            .jpeg({ quality: 60 })
             .toBuffer();
 
         const s3Params = {

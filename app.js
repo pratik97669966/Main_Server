@@ -97,11 +97,11 @@ app.post('/upload/image', upload.single('image'), async (req, res) => {
 
         res.status(200).json({
             message: 'File uploaded successfully',
-            url: data.Location, // S3 file URL
+            url: data.Location,
         });
     } catch (error) {
-        console.error('Error uploading file:', error); // Log the full error object
-        res.status(500).json({ error: 'Failed to upload file' });
+        console.error('Error uploading file:', error);
+        res.status(500).json({ error: ''+error });
     }
 });
 app.use((req, res) => {

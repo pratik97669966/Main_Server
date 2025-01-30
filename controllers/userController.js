@@ -301,6 +301,8 @@ exports.searchByName = async (req, res) => {
         partnerExpectations
     } = searchData;
     const userIdPattern = /^(KG|KOG|KB|KOB)\d{4}$/; // Define the pattern for userId
+    const mobileNumberPattern = /^\d{10}$/; // Define the pattern for a 10-digit mobile number
+
     try {
         let filter = {};
         if (!isAdmin) {
@@ -395,6 +397,8 @@ exports.searchByName = async (req, res) => {
             }
             if (userIdPattern.test(name.toUpperCase())) {
                 filter.userId = name.toUpperCase();
+            } else if (mobileNumberPattern.test(name)) {
+                filter.phone = name;
             } else {
                 filter.name = { $regex: name, $options: "i" };
             }

@@ -300,8 +300,8 @@ exports.searchByName = async (req, res) => {
         preferredNativeCities,
         partnerExpectations
     } = searchData;
-    const userIdPattern = /^(KG|KOG|KB|KOB)\d{4}$/; // Define the pattern for userId
-    const mobileNumberPattern = /^\d{10}$/; // Define the pattern for a 10-digit mobile number
+    const userIdPattern = /^(KG|KOG|KB|KOB|KO)\d{4}$/;
+    const mobileNumberPattern = /^\d{10}$/;
 
     try {
         let filter = {};

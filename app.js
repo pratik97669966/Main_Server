@@ -80,15 +80,15 @@ app.post('/upload/image', upload.single('image'), async (req, res) => {
         }
 
         // Compress the image using sharp
-        const compressedImageBuffer = await sharp(file.buffer)
-            .resize({ width: 800 })
-            .jpeg({ quality: 60 })
-            .toBuffer();
+        // const compressedImageBuffer = await sharp(file.buffer)
+        //     .resize({ width: 800 })
+        //     .jpeg({ quality: 60 })
+        //     .toBuffer();
 
         const s3Params = {
             Bucket: process.env.S3_BUCKET_NAME,
             Key: `${Date.now()}_${file.originalname}`,
-            Body: compressedImageBuffer,
+            Body: file.buffer,
             ContentType: 'image/jpeg',
         };
 

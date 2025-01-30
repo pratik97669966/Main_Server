@@ -18,9 +18,9 @@ connectDB();
 
 // Configure AWS S3
 AWS.config.update({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION,
+    accessKeyId: 'AKIA5WLTSZQIW4RH465S',
+    secretAccessKey: '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',
+    region: 'ap-south-1',
 });
 
 const s3 = new AWS.S3();
@@ -36,10 +36,10 @@ const upload = multer({
 app.use('/', userRoutes); // Prefix routes with /api
 app.use('/android/:userId', (req, res) => {
     const userId = req.params.userId;
-    
+
     // Construct the deep link URL
     const deepLinkUrl = `kartavyavivahbandhan://user/${userId}`;
-    
+
     // Construct the Play Store URL
     const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.kartavya.vivahbandhan'; // Replace with your app's package name
 
@@ -62,7 +62,7 @@ app.use('/android/:userId', (req, res) => {
         </body>
         </html>
     `;
-    
+
     res.send(htmlContent);
 });
 
@@ -86,7 +86,7 @@ app.post('/upload/image', upload.single('image'), async (req, res) => {
         //     .toBuffer();
 
         const s3Params = {
-            Bucket: process.env.S3_BUCKET_NAME,
+            Bucket: 'kartavyavivahbandhanstorage',
             Key: `${Date.now()}_${file.originalname}`,
             Body: file.buffer,
             ContentType: 'image/jpeg',
@@ -101,7 +101,7 @@ app.post('/upload/image', upload.single('image'), async (req, res) => {
         });
     } catch (error) {
         console.error('Error uploading file:', error);
-        res.status(500).json({ error: ''+error });
+        res.status(500).json({ error: '' + error });
     }
 });
 app.use((req, res) => {
@@ -112,7 +112,7 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // Start the server
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3300;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

@@ -434,6 +434,9 @@ exports.deleteUser = async (req, res) => {
 // Record or update a profile view
 exports.viewProfile = async (req, res) => {
     const { viewerId, viewedUserId } = req.body;
+    if(viewerId === viewedUserId) {
+        return res.status(400).json({ error: "You cannot view your own profile" });
+    }
     try {
         const view = await ProfileView.findOneAndUpdate(
             { viewerId, viewedUserId },

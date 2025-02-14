@@ -18,7 +18,6 @@ router.post('/searchbyname', userController.searchByName); // Search By Name
 router.get('/unregister', userController.getUnregister); // Search By Name
 // Profile Management
 router.post('/profile/view', userController.viewProfile); // View a profile
-router.get('/profile/deleteInvalidProfileViews', userController.deleteInvalidProfileViews); // View a profile
 router.get('/profile/viewed/:userId', userController.getMyViewedProfiles); // Profiles the user has viewed
 router.get('/profile/viewers/:userId', userController.getWhoViewedProfile); // Who viewed the user's profile
 

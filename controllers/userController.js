@@ -429,27 +429,12 @@ exports.deleteUser = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
-const mongoose = require('mongoose');
-const ProfileView = require('../models/ProfileView'); // Adjust the path as needed
 
-exports.deleteInvalidProfileViews = async (req, res) => {
-    try {
-        // Find and delete records where viewerId and viewedUserId are the same
-        const result = await ProfileView.deleteMany({
-            $expr: { $eq: ["$viewerId", "$viewedUserId"] }
-        });
-
-        res.status(200).json({ message: 'Invalid profile views deleted successfully', deletedCount: result.deletedCount });
-    } catch (error) {
-        console.error('Error deleting invalid profile views:', error);
-        res.status(500).json({ error: 'Failed to delete invalid profile views' });
-    }
-};
 // Profile Views Management
 // Record or update a profile view
 exports.viewProfile = async (req, res) => {
     const { viewerId, viewedUserId } = req.body;
-    if (viewerId === viewedUserId) {
+    if(viewerId === viewedUserId) {
         return res.status(400).json({ error: "You cannot view your own profile" });
     }
     try {

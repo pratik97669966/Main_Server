@@ -7,7 +7,7 @@ const Block = require('../models/Block');
 const MyContacts = require('../models/MyContacts');
 const ShortListed = require('../models/ShortListed');
 const ViewContact = require('../models/ViewContact');
-const mongoose = require('mongoose'); // Ensure Mongoose is imported
+const mongoose = require('mongoose');
 const moment = require('moment');
 
 // Utility Functions
@@ -434,7 +434,7 @@ exports.deleteUser = async (req, res) => {
 // Record or update a profile view
 exports.viewProfile = async (req, res) => {
     const { viewerId, viewedUserId } = req.body;
-    if(viewerId === viewedUserId) {
+    if (viewerId === viewedUserId) {
         return res.status(400).json({ error: "You cannot view your own profile" });
     }
     try {
@@ -449,7 +449,6 @@ exports.viewProfile = async (req, res) => {
     }
 };
 
-// Get list of profiles I have viewed
 exports.getMyViewedProfiles = async (req, res) => {
     const { userId } = req.params;
     const { page = 1, limit = 10 } = req.query;
@@ -461,9 +460,18 @@ exports.getMyViewedProfiles = async (req, res) => {
             .sort({ date: -1 })
             .skip(skip)
             .limit(limit);
-
         const userCountList = await Promise.all(
-            views.map(async (view) => User.findOne({ userId: view.viewedUserId }))
+            views.map(async (view) => {
+                const user = await User.findOne({ userId: view.viewedUserId });
+                if (user) {
+                    // Add the viewedDate field to the user object
+                    return {
+                        ...user.toObject(),
+                        viewedDate: view.date
+                    };
+                }
+                return null;
+            })
         );
 
         const response = {
@@ -491,9 +499,18 @@ exports.getWhoViewedProfile = async (req, res) => {
             .limit(limit);
 
         const userCountList = await Promise.all(
-            views.map(async (view) => User.findOne({ userId: view.viewerId }))
+            views.map(async (view) => {
+                const user = await User.findOne({ userId: view.viewerId });
+                if (user) {
+                    // Add the viewedDate field to the user object
+                    return {
+                        ...user.toObject(),
+                        viewedDate: view.date
+                    };
+                }
+                return null;
+            })
         );
-
         const response = {
             page: { totalPages: Math.ceil(totalViews / limit), currentPage: page },
             userCountList: userCountList.filter(Boolean),
@@ -569,11 +586,17 @@ exports.getInterestsSend = async (req, res) => {
         // Populate user data for the viewed profiles
         const userCountList = await Promise.all(
             views.map(async (view) => {
-                const viewedUser = await User.findOne({ userId: view.targetUserId });
-                return viewedUser;
+                const user = await User.findOne({ userId: view.targetUserId });
+                if (user) {
+                    // Add the viewedDate field to the user object
+                    return {
+                        ...user.toObject(),
+                        viewedDate: view.date
+                    };
+                }
+                return null;
             })
         );
-
         // Filter out any null values in case some user data is missing
         const filteredUserCountList = userCountList.filter((user) => user !== null);
 
@@ -618,11 +641,17 @@ exports.getInterestsRecived = async (req, res) => {
         // Populate user data for the viewed profiles
         const userCountList = await Promise.all(
             views.map(async (view) => {
-                const viewedUser = await User.findOne({ userId: view.interestedUserId });
-                return viewedUser;
+                const user = await User.findOne({ userId: view.interestedUserId });
+                if (user) {
+                    // Add the viewedDate field to the user object
+                    return {
+                        ...user.toObject(),
+                        viewedDate: view.date
+                    };
+                }
+                return null;
             })
         );
-
         // Filter out any null values in case some user data is missing
         const filteredUserCountList = userCountList.filter((user) => user !== null);
 
@@ -683,9 +712,18 @@ exports.getContacts = async (req, res) => {
             .limit(limit);
 
         const contactDetails = await Promise.all(
-            contacts.map(async (contact) => User.findOne({ userId: contact.contactUserId }))
+            views.map(async (view) => {
+                const user = await User.findOne({ userId: view.contactUserId });
+                if (user) {
+                    // Add the viewedDate field to the user object
+                    return {
+                        ...user.toObject(),
+                        viewedDate: view.date
+                    };
+                }
+                return null;
+            })
         );
-
         // Filter out any null values in case some user data is missing
         const filteredUserCountList = contactDetails.filter((user) => user !== null);
 
@@ -786,15 +824,11 @@ exports.getViewContactSend = async (req, res) => {
                 const response = {
                     userData: viewedUser,
                     viewContact: views[index],
+                    viewedDate: view.date
                 };
                 return response;
             })
         );
-
-        // Filter out any null values in case some user data is missing
-        // const filteredUserCountList = userCountList.filter((user) => user !== null);
-
-        // Construct the response
         const response = {
             page: {
                 totalPages: Math.ceil(totalViews / limit),
@@ -839,15 +873,11 @@ exports.getViewContactReceived = async (req, res) => {
                 const response = {
                     userData: viewedUser,
                     viewContact: views[index],
+                    viewedDate: view.date
                 };
                 return response;
             })
         );
-
-        // Filter out any null values in case some user data is missing
-        // const filteredUserCountList = userCountList.filter((user) => user !== null);
-
-        // Construct the response
         const response = {
             page: {
                 totalPages: Math.ceil(totalViews / limit),

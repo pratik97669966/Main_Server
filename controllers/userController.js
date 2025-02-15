@@ -831,10 +831,15 @@ exports.getViewContactSend = async (req, res) => {
         const userCountList = await Promise.all(
             views.map(async (view, index) => {
                 const viewedUser = await User.findOne({ userId: view.viewContactTargetUserId });
+                if (viewedUser) {
+                    const user = {
+                        ...viewedUser.toObject(),
+                        viewedDate: view.date
+                    }
+                }
                 const response = {
                     userData: viewedUser,
-                    viewContact: views[index],
-                    viewedDate: view.date
+                    viewContact: views[index]
                 };
                 return response;
             })
@@ -880,10 +885,15 @@ exports.getViewContactReceived = async (req, res) => {
         const userCountList = await Promise.all(
             views.map(async (view, index) => {
                 const viewedUser = await User.findOne({ userId: view.viewContactUserId });
+                if (viewedUser) {
+                    const user = {
+                        ...viewedUser.toObject(),
+                        viewedDate: view.date
+                    }
+                }
                 const response = {
                     userData: viewedUser,
-                    viewContact: views[index],
-                    viewedDate: view.date
+                    viewContact: views[index]
                 };
                 return response;
             })

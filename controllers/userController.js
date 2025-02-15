@@ -532,7 +532,7 @@ exports.getWhoViewedProfile = async (req, res) => {
 // Interests Management
 exports.showInterest = async (req, res) => {
     const { interestedUserId, targetUserId, status } = req.body;
-//pratik todo
+    //pratik todo
     try {
         // if (['CANCELLED', 'REJECTED'].includes(status)) {
         //     await Interest.deleteOne({ interestedUserId, targetUserId });
@@ -1043,19 +1043,14 @@ exports.deletePhotoUrl = async (req, res) => {
     }
 
     try {
-        // Extract the key from the URL
-        const urlParts = url.split('/');
-        const key = urlParts.slice(3).join('/'); // Adjust the slice index based on your URL structure
+        // const urlParts = url.split('/');
+        // const key = urlParts.slice(3).join('/');
 
-        const s3Params = {
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: key,
-        };
-
-        // Delete the object from S3
-        await s3.deleteObject(s3Params).promise();
-
-        // Remove the URL from the user's photoUrls array
+        // const s3Params = {
+        //     Bucket: "kartavyavivahbandhanstorage",
+        //     Key: key,
+        // };
+        // await s3.deleteObject(s3Params).promise();
         const user = await User.findOneAndUpdate(
             { userId },
             { $pull: { photoUrls: url } },
@@ -1066,10 +1061,7 @@ exports.deletePhotoUrl = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.status(200).json({
-            message: 'File deleted successfully',
-            user,
-        });
+        res.json(user);
     } catch (error) {
         console.error('Error deleting file:', error.message);
         res.status(500).json({ error: 'Failed to delete file' });

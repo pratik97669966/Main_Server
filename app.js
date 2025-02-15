@@ -70,7 +70,10 @@ app.get('/privacypolicy', (req, res) => {
     const filePath = path.join(__dirname, 'public', 'privacy_policy.html');
     res.sendFile(filePath);
 });
-
+app.get('/csae', (req, res) => {
+    const filePath = path.join(__dirname, 'public', 'csae.html');
+    res.sendFile(filePath);
+});
 app.post('/upload/image', upload.single('image'), async (req, res) => {
     try {
         const file = req.file;

@@ -837,7 +837,7 @@ exports.getViewContactSend = async (req, res) => {
                     }
 
                     const response = {
-                        userData: viewedUser,
+                        userData: user,
                         viewContact: views[index]
                     };
                     return response;
@@ -896,7 +896,7 @@ exports.getViewContactReceived = async (req, res) => {
                     }
 
                     const response = {
-                        userData: viewedUser,
+                        userData: user,
                         viewContact: views[index]
                     };
                     return response;

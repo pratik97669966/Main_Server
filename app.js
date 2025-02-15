@@ -105,33 +105,24 @@ app.post('/upload/image', upload.single('image'), async (req, res) => {
     }
 });
 app.use((req, res) => {
-    res.status(404).json({ error: "Route not found" });
-});
-app.delete('/delete/image', async (req, res) => {
-    const { url,userId } = req.body;
+    // Construct the Play Store URL
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.kartavya.vivahbandhan'; // Replace with your app's package name
 
-    if (!url) {
-        return res.status(400).json({ error: 'URL is required' });
-    }
+    // Serve an HTML page to handle the redirection logic
+    const htmlContent = `
+        <html>
+        <head>
+            <script type="text/javascript"> 
+            window.location.href = "${playStoreUrl}";
+            </script>
+        </head>
+        <body>
+            <p>If you are not redirected, <a href="${playStoreUrl}">click here to open in Play Store</a>.</p>
+        </body>
+        </html>
+    `;
 
-    try {
-        // Extract the key from the URL
-        const urlParts = url.split('/');
-        const key = urlParts.slice(3).join('/'); // Adjust the slice index based on your URL structure
-
-        const s3Params = {
-            Bucket: process.env.S3_BUCKET_NAME,
-            Key: key,
-        };
-
-        // Delete the object from S3
-        await s3.deleteObject(s3Params).promise();
-
-        res.status(200).json({ message: 'File deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting file:', error.message);
-        res.status(500).json({ error: 'Failed to delete file' });
-    }
+    res.send(htmlContent);
 });
 // Error Handling Middleware (if using)
 app.use(errorHandler);

@@ -12,6 +12,8 @@ router.get('/users', userController.getAllUsers); // Get all users
 router.get('/users/gender/:gender', userController.getUsersByGender); // Get users by gender
 router.get('/matches/:userId/:gender/:lookingfor', userController.getUsersByFilter); // Get user matches
 router.delete('/user/:userId', userController.deleteUser); // Delete a user
+// Delete user photo url
+router.post('/user/deletephoto', userController.deletePhotoUrl);
 // Search upload/imageUser
 router.post('/searchbyname', userController.searchByName); // Search By Name
 // Unregister user
@@ -46,6 +48,7 @@ router.get('/view/contact/received/:userId', userController.getViewContactReceiv
 
 // Statistics and Counts
 router.get('/counts/:userId', userController.getCounts); // Get statistics and counts
+
 
 
 module.exports = router;

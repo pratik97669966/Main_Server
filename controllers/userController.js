@@ -9,7 +9,14 @@ const ShortListed = require('../models/ShortListed');
 const ViewContact = require('../models/ViewContact');
 const mongoose = require('mongoose');
 const moment = require('moment');
+const AWS = require('aws-sdk');
+AWS.config.update({
+    accessKeyId: 'AKIA5WLTSZQIW4RH465S',
+    secretAccessKey: '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',
+    region: 'ap-south-1',
+});
 
+const s3 = new AWS.S3();
 // Utility Functions
 // Generate a unique user ID
 const generateUserId = async (userData) => {
@@ -525,12 +532,12 @@ exports.getWhoViewedProfile = async (req, res) => {
 // Interests Management
 exports.showInterest = async (req, res) => {
     const { interestedUserId, targetUserId, status } = req.body;
-
+//pratik todo
     try {
-        if (['CANCELLED', 'REJECTED'].includes(status)) {
-            await Interest.deleteOne({ interestedUserId, targetUserId });
-            return res.status(200).json({ message: 'Interest removed successfully' });
-        }
+        // if (['CANCELLED', 'REJECTED'].includes(status)) {
+        //     await Interest.deleteOne({ interestedUserId, targetUserId });
+        //     return res.status(200).json({ message: 'Interest removed successfully' });
+        // }
 
         if (status === 'ACCEPTED') {
             await Interest.deleteOne({ interestedUserId, targetUserId, status });
@@ -674,7 +681,9 @@ exports.getInterestsRecived = async (req, res) => {
 // Add a contact
 exports.addContact = async (req, res) => {
     const { myUserId, contactUserId } = req.body;
-
+    if (myUserId === contactUserId) {
+        return res.status(400).json({ error: "You cannot add yourself as a contact" });
+    }
     try {
         const date = new Date();
 
@@ -779,10 +788,9 @@ exports.addShortlisted = async (req, res) => {
 
 exports.viewContact = async (req, res) => {
     const { viewContactUserId, viewContactTargetUserId, viewContactStatus } = req.body;
-    // if (['REMOVE'].includes(viewContactStatus)) {
-    //     await ShortListed.deleteOne({ viewContactUserId, viewContactTargetUserId });
-    //     return res.status(200).json({ message: 'View Contact removed successfully' });
-    // }
+    if (viewContactUserId === viewContactTargetUserId) {
+        return res.status(400).json({ error: "You cannot view your own profile" });
+    }
     try {
         const view = await ViewContact.findOneAndUpdate(
             { viewContactUserId, viewContactTargetUserId },
@@ -900,15 +908,23 @@ exports.getShortlisted = async (req, res) => {
 
     try {
         const totalContacts = await ShortListed.countDocuments({ myUserId: userId });
-        const contacts = await ShortListed.find({ myUserId: userId })
+        const views = await ShortListed.find({ myUserId: userId })
             .sort({ date: -1 })
             .skip(skip)
             .limit(limit);
-
         const contactDetails = await Promise.all(
-            contacts.map(async (contact) => User.findOne({ userId: contact.shortListUserId }))
+            views.map(async (view) => {
+                const user = await User.findOne({ userId: view.shortListUserId });
+                if (user) {
+                    // Add the viewedDate field to the user object
+                    return {
+                        ...user.toObject(),
+                        viewedDate: view.date
+                    };
+                }
+                return null;
+            })
         );
-
         // Filter out any null values in case some user data is missing
         const filteredUserCountList = contactDetails.filter((user) => user !== null);
 
@@ -1016,5 +1032,46 @@ exports.getCounts = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+};
+
+exports.deletePhotoUrl = async (req, res) => {
+    const { url, userId } = req.body;
+
+    if (!url || !userId) {
+        return res.status(400).json({ error: 'URL and userId are required' });
+    }
+
+    try {
+        // Extract the key from the URL
+        const urlParts = url.split('/');
+        const key = urlParts.slice(3).join('/'); // Adjust the slice index based on your URL structure
+
+        const s3Params = {
+            Bucket: process.env.S3_BUCKET_NAME,
+            Key: key,
+        };
+
+        // Delete the object from S3
+        await s3.deleteObject(s3Params).promise();
+
+        // Remove the URL from the user's photoUrls array
+        const user = await User.findOneAndUpdate(
+            { userId },
+            { $pull: { photoUrls: url } },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({
+            message: 'File deleted successfully',
+            user,
+        });
+    } catch (error) {
+        console.error('Error deleting file:', error.message);
+        res.status(500).json({ error: 'Failed to delete file' });
     }
 };

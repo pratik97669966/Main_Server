@@ -1053,7 +1053,7 @@ exports.deletePhotoUrl = async (req, res) => {
         // await s3.deleteObject(s3Params).promise();
         const user = await User.findOneAndUpdate(
             { userId },
-            { $pull: { photoUrls: url } },
+            { $pull: { profilePictureUrls: url } },
             { new: true }
         );
 
@@ -1061,7 +1061,10 @@ exports.deletePhotoUrl = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.json(user);
+        res.status(200).json({
+            message: 'File deleted successfully',
+            user,
+        });
     } catch (error) {
         console.error('Error deleting file:', error.message);
         res.status(500).json({ error: 'Failed to delete file' });

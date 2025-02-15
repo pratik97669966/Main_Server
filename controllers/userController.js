@@ -1069,10 +1069,7 @@ exports.deletePhotoUrl = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.status(200).json({
-            message: 'File marked for deletion successfully',
-            user,
-        });
+        res.json(user);
     } catch (error) {
         console.error('Error marking file for deletion:', error.message);
         res.status(500).json({ error: 'Failed to mark file for deletion' });

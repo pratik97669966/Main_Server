@@ -805,7 +805,6 @@ exports.viewContact = async (req, res) => {
     }
 };
 
-// getViewContactSend
 exports.getViewContactSend = async (req, res) => {
     const { userId } = req.params;
     let { page = 1, limit = 10 } = req.query; // Default to page 1, 10 items per page
@@ -836,20 +835,26 @@ exports.getViewContactSend = async (req, res) => {
                         ...viewedUser.toObject(),
                         viewedDate: view.date
                     }
+
+                    const response = {
+                        userData: viewedUser,
+                        viewContact: views[index]
+                    };
+                    return response;
                 }
-                const response = {
-                    userData: viewedUser,
-                    viewContact: views[index]
-                };
-                return response;
+                return null;
             })
         );
+
+        // Filter out any null values
+        const filteredUserCountList = userCountList.filter(user => user !== null);
+
         const response = {
             page: {
                 totalPages: Math.ceil(totalViews / limit),
                 currentPage: page,
             },
-            userCountList: userCountList,
+            userCountList: filteredUserCountList,
         };
 
         res.status(200).json(response);
@@ -870,7 +875,6 @@ exports.getViewContactReceived = async (req, res) => {
     const skip = (page - 1) * limit;
 
     try {
-
         // Total count of views to calculate total pages
         const totalViews = await ViewContact.countDocuments({ viewContactTargetUserId: userId });
 
@@ -890,20 +894,26 @@ exports.getViewContactReceived = async (req, res) => {
                         ...viewedUser.toObject(),
                         viewedDate: view.date
                     }
+
+                    const response = {
+                        userData: viewedUser,
+                        viewContact: views[index]
+                    };
+                    return response;
                 }
-                const response = {
-                    userData: viewedUser,
-                    viewContact: views[index]
-                };
-                return response;
+                return null; // Return null if user does not exist
             })
         );
+
+        // Filter out any null values
+        const filteredUserCountList = userCountList.filter(user => user !== null);
+
         const response = {
             page: {
                 totalPages: Math.ceil(totalViews / limit),
                 currentPage: page,
             },
-            userCountList: userCountList,
+            userCountList: filteredUserCountList,
         };
 
         res.status(200).json(response);
@@ -912,6 +922,7 @@ exports.getViewContactReceived = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 // Get contacts of a user
 exports.getShortlisted = async (req, res) => {
     const { userId } = req.params;

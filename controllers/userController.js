@@ -7,6 +7,7 @@ const Block = require('../models/Block');
 const MyContacts = require('../models/MyContacts');
 const ShortListed = require('../models/ShortListed');
 const ViewContact = require('../models/ViewContact');
+const DeletePhotoUrls = require('../models/DeletePhotoUrls');
 const mongoose = require('mongoose');
 const moment = require('moment');
 const AWS = require('aws-sdk');
@@ -17,6 +18,7 @@ AWS.config.update({
 });
 
 const s3 = new AWS.S3();
+
 // Utility Functions
 // Generate a unique user ID
 const generateUserId = async (userData) => {
@@ -1051,6 +1053,12 @@ exports.deletePhotoUrl = async (req, res) => {
         //     Key: key,
         // };
         // await s3.deleteObject(s3Params).promise();
+
+        // Save the URL to the DeletePhotoUrls collection
+        const deletePhotoUrl = new DeletePhotoUrls({ url, userId });
+        await deletePhotoUrl.save();
+
+        // Remove the URL from the user's profilePictureUrls array
         const user = await User.findOneAndUpdate(
             { userId },
             { $pull: { profilePictureUrls: url } },
@@ -1062,11 +1070,11 @@ exports.deletePhotoUrl = async (req, res) => {
         }
 
         res.status(200).json({
-            message: 'File deleted successfully',
+            message: 'File marked for deletion successfully',
             user,
         });
     } catch (error) {
-        console.error('Error deleting file:', error.message);
-        res.status(500).json({ error: 'Failed to delete file' });
+        console.error('Error marking file for deletion:', error.message);
+        res.status(500).json({ error: 'Failed to mark file for deletion' });
     }
 };

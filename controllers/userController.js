@@ -723,7 +723,7 @@ exports.getContacts = async (req, res) => {
             .limit(limit);
 
         const contactDetails = await Promise.all(
-            views.map(async (view) => {
+            contacts.map(async (view) => {
                 const user = await User.findOne({ userId: view.contactUserId });
                 if (user) {
                     // Add the viewedDate field to the user object

@@ -48,7 +48,7 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true,
 
     // eslint-disable-next-line no-shadow
     io.on('connection', (socket) => {
-      console.log(`The socket is connected! Socket id: ${socket.id}`);
+      //console.log(`The socket is connected! Socket id: ${socket.id}`);
 
       // Send the list of all users to the new client
       connectedUsers[socket.id] = socket;

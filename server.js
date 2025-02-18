@@ -76,7 +76,7 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true,
           { $set: user }
         )
           .then(() => {
-            console.log(`User ${user.name} updated in MongoDB`);
+            console.log(`User ${user.username} updated in MongoDB`);
             io.emit('user-update', user);
           })
           .catch((err) => {

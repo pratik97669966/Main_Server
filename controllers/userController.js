@@ -611,7 +611,7 @@ exports.showInterest = async (req, res) => {
         const user = await User.findOne({ userId: interestedUserId });
         const payload = {
             topic: targetUserId,
-            title: (user.name?.split(" ")[0] || "") + 'Send you intrest',
+            title: (user.name?.split(" ")[0] || "") + ' Send you intrest',
             messageBody: 'click here now or see in dashboard',
             imageUrl: user.profilePictureUrls[0],
             senderName: user.name,
@@ -769,7 +769,6 @@ exports.addContact = async (req, res) => {
             senderId: myUserId,
             name: user.name,
         };
-
         // Add contact in both directions
         await Promise.all([
             MyContacts.findOneAndUpdate(

@@ -17,7 +17,7 @@ AWS.config.update({
     secretAccessKey: '8J/UmBT0M0AJpdzVEtjoq2EM6cECcFIlK6wjLmKC',
     region: 'ap-south-1',
 });
-const fcmUrl = 'https://entity-fcm.vercel.app/';
+const fcmUrl = 'https://entity-fcm.vercel.app/sendNotificationToTopic';
 
 const s3 = new AWS.S3();
 

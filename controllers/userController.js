@@ -455,6 +455,23 @@ exports.viewProfile = async (req, res) => {
             { date: new Date() },
             { new: true, upsert: true }
         );
+        const user = await User.findOne({ userId: viewerId });
+        const payload = {
+            topic: viewedUserId,
+            title: user.name + 'Just view your profile',
+            messageBody: 'click here now or see in dashboard',
+            imageUrl: user.profilePictureUrls[0],
+            senderName: '',
+            senderId: viewerId,
+            name: '',
+        };
+        callApi(fcmUrl, payload)
+            .then(response => {
+
+            })
+            .catch(error => {
+
+            });
         res.status(200).json({ view });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -547,15 +564,22 @@ exports.showInterest = async (req, res) => {
         if (status === 'ACCEPTED') {
             await Interest.deleteOne({ interestedUserId, targetUserId, status });
             const date = new Date();
+            // i want get user name to insert in tittle
+
+            const targetUser = await
+                User.findOne({
+                    userId
+                        : targetUserId
+                });
 
             const payload = {
-                topic: interestedUserId,
-                title: 'Interest Accepted',
-                messageBody: 'Your Interest has been accepted',
-                imageUrl: 'https://t4.ftcdn.net/jpg/08/40/00/65/360_F_840006528_WSZcPMt5R7uhjEpD0VXuo0OhTO6O386Q.jpg',
-                senderName: '',
+                topic: interestedUserId.toLowerCase(),
+                title: targetUser.name + ' Accept your intrest',
+                messageBody: 'click here now or see in dashboard',
+                imageUrl: targetUser.profilePictureUrls[0],
+                senderName: targetUser.name,
                 senderId: targetUserId,
-                name: '',
+                name: targetUser.name,
             };
             callApi(fcmUrl, payload)
                 .then(response => {
@@ -584,11 +608,12 @@ exports.showInterest = async (req, res) => {
             { date: new Date() },
             { new: true, upsert: true }
         );
+        const user = await User.findOne({ userId: interestedUserId });
         const payload = {
             topic: targetUserId,
-            title: 'Interest Recived',
-            messageBody: 'Click to view',
-            imageUrl: 'https://media.istockphoto.com/id/1387104685/vector/square-label-banner-with-word-requested-in-green-color-on-gray-background.jpg?s=612x612&w=0&k=20&c=MxmUlOOYArA6VyIey8t5VRvbyCLJaQiDnVzysq7af4s=',
+            title: user.name + 'Send you intrest',
+            messageBody: 'click here now or see in dashboard',
+            imageUrl: user.profilePictureUrls[0],
             senderName: '',
             senderId: interestedUserId,
             name: '',
@@ -724,6 +749,26 @@ exports.addContact = async (req, res) => {
     }
     try {
         const date = new Date();
+        const user = await User.findOne({ userId: myUserId });
+        const otherUser = await User.findOne({ userId: contactUserId });
+        const payload = {
+            topic: myUserId,
+            title: otherUser.name + ' Added you as a contact',
+            messageBody: 'click here now or see in dashboard',
+            imageUrl: otherUser.profilePictureUrls[0],
+            senderName: '',
+            senderId: contactUserId,
+            name: '',
+        };
+        const payloadOtherUser = {
+            topic: contactUserId,
+            title: user.name + ' Added you as a contact',
+            messageBody: 'click here now or see in dashboard',
+            imageUrl: myUserId.profilePictureUrls[0],
+            senderName: user.name,
+            senderId: myUserId,
+            name: user.name,
+        };
 
         // Add contact in both directions
         await Promise.all([
@@ -738,7 +783,20 @@ exports.addContact = async (req, res) => {
                 { new: true, upsert: true }
             ),
         ]);
+        callApi(fcmUrl, payloadOtherUser)
+            .then(response => {
 
+            })
+            .catch(error => {
+
+            });
+        callApi(fcmUrl, payload)
+            .then(response => {
+
+            })
+            .catch(error => {
+
+            });
         res.status(200).json({ message: 'Contact added successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });

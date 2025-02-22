@@ -461,9 +461,9 @@ exports.viewProfile = async (req, res) => {
             title: (user.name?.split(" ")[0] || "") + " Just viewed your profile",
             messageBody: 'click here now or see in dashboard',
             imageUrl: user.profilePictureUrls[0],
-            senderName: '',
+            senderName: user.name,
             senderId: viewerId,
-            name: '',
+            name: user.name,
         };
         callApi(fcmUrl, payload)
             .then(response => {
@@ -614,9 +614,9 @@ exports.showInterest = async (req, res) => {
             title: (user.name?.split(" ")[0] || "") + 'Send you intrest',
             messageBody: 'click here now or see in dashboard',
             imageUrl: user.profilePictureUrls[0],
-            senderName: '',
+            senderName: user.name,
             senderId: interestedUserId,
-            name: '',
+            name: user.name,
         };
         callApi(fcmUrl, payload)
             .then(response => {
@@ -756,9 +756,9 @@ exports.addContact = async (req, res) => {
             title: (otherUser.name?.split(" ")[0] || "") + ' Added you as a contact',
             messageBody: 'click here now or see in dashboard',
             imageUrl: otherUser.profilePictureUrls[0],
-            senderName: '',
+            senderName: otherUser.name,
             senderId: contactUserId,
-            name: '',
+            name: otherUser.name,
         };
         const payloadOtherUser = {
             topic: contactUserId,
@@ -876,24 +876,24 @@ exports.addShortlisted = async (req, res) => {
             { date: new Date() },
             { new: true, upsert: true }
         );
-        const targetUser = await User.findOne({userId : myUserId });
+        const targetUser = await User.findOne({ userId: myUserId });
 
-    const payload = {
-        topic: shortListUserId.toLowerCase(),
-        title: (targetUser.name?.split(" ")[0] || "") + ' Just Shortlisted you',
-        messageBody: 'click here now or see in dashboard',
-        imageUrl: targetUser.profilePictureUrls[0],
-        senderName: targetUser.name,
-        senderId: myUserId,
-        name: targetUser.name,
-    };
-    callApi(fcmUrl, payload)
-        .then(response => {
+        const payload = {
+            topic: shortListUserId.toLowerCase(),
+            title: (targetUser.name?.split(" ")[0] || "") + ' Just Shortlisted you',
+            messageBody: 'click here now or see in dashboard',
+            imageUrl: targetUser.profilePictureUrls[0],
+            senderName: targetUser.name,
+            senderId: myUserId,
+            name: targetUser.name,
+        };
+        callApi(fcmUrl, payload)
+            .then(response => {
 
-        })
-        .catch(error => {
+            })
+            .catch(error => {
 
-        });
+            });
         res.status(200).json({ view });
     } catch (error) {
         res.status(500).json({ error: error.message });

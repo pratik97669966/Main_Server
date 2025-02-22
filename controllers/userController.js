@@ -11,11 +11,13 @@ const DeletePhotoUrls = require('../models/DeletePhotoUrls');
 const mongoose = require('mongoose');
 const moment = require('moment');
 const AWS = require('aws-sdk');
+const { name } = require('ejs');
 AWS.config.update({
     accessKeyId: 'AKIA5WLTSZQIW4RH465S',
     secretAccessKey: '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',
     region: 'ap-south-1',
 });
+const fcmUrl = 'https://entity-fcm.vercel.app/';
 
 const s3 = new AWS.S3();
 
@@ -544,6 +546,23 @@ exports.showInterest = async (req, res) => {
         if (status === 'ACCEPTED') {
             await Interest.deleteOne({ interestedUserId, targetUserId, status });
             const date = new Date();
+
+            const payload = {
+                topic: interestedUserId,
+                title: 'Interest Accepted',
+                messageBody: 'Your Interest has been accepted',
+                imageUrl: 'https://t4.ftcdn.net/jpg/08/40/00/65/360_F_840006528_WSZcPMt5R7uhjEpD0VXuo0OhTO6O386Q.jpg',
+                senderName: '',
+                senderId: targetUserId,
+                name: '',
+            };
+            callApi(fcmUrl, payload)
+                .then(response => {
+                    
+                })
+                .catch(error => {
+
+                });
             await Promise.all([
                 MyContacts.findOneAndUpdate(
                     { myUserId: interestedUserId, contactUserId: targetUserId },
@@ -564,6 +583,22 @@ exports.showInterest = async (req, res) => {
             { date: new Date() },
             { new: true, upsert: true }
         );
+        const payload = {
+            topic: targetUserId,
+            title: 'Interest Recived',
+            messageBody: 'Click to view',
+            imageUrl: 'https://media.istockphoto.com/id/1387104685/vector/square-label-banner-with-word-requested-in-green-color-on-gray-background.jpg?s=612x612&w=0&k=20&c=MxmUlOOYArA6VyIey8t5VRvbyCLJaQiDnVzysq7af4s=',
+            senderName: '',
+            senderId: interestedUserId,
+            name: '',
+        };
+        callApi(fcmUrl, payload)
+            .then(response => {
+                
+            })
+            .catch(error => {
+
+            });
         res.status(200).json({ message: 'Interest recorded or updated successfully', interest });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -789,11 +824,20 @@ exports.addShortlisted = async (req, res) => {
 };
 
 exports.viewContact = async (req, res) => {
-    const { viewContactUserId, viewContactTargetUserId, viewContactStatus } = req.body;
+    const { viewContactUserId, viewContactTargetUserId, viewContactStatus, isRequestApprove = false } = req.body;
     if (viewContactUserId === viewContactTargetUserId) {
         return res.status(400).json({ error: "You cannot view your own profile" });
     }
     try {
+        if (isRequestApprove) {
+            // if its true then deduct noOfcontacts from viewContactUserId
+            const user = await User.findOne({ userId: viewContactUserId });
+            await User.findOneAndUpdate(
+                { userId: viewContactUserId },
+                { $inc: { noOfContacts: -1 } },
+                { new: true }
+            );
+        }
         const view = await ViewContact.findOneAndUpdate(
             { viewContactUserId, viewContactTargetUserId },
             { viewContactStatus, date: new Date() },

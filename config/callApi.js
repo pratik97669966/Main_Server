@@ -5,8 +5,7 @@ const callApi = async (url, payload) => {
         const response = await axios.post(url, payload);
         return response.data;
     } catch (error) {
-        console.error('Error calling API:', error.message);
-        throw new Error('Failed to call API');
+       
     }
 };
 

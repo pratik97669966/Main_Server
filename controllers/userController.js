@@ -876,15 +876,11 @@ exports.addShortlisted = async (req, res) => {
             { date: new Date() },
             { new: true, upsert: true }
         );
-        const targetUser = await
-        User.findOne({
-            userId
-                : myUserId
-        });
+        const targetUser = await User.findOne({userId : myUserId });
 
     const payload = {
         topic: shortListUserId.toLowerCase(),
-        title: (myUserId.name.name?.split(" ")[0] || "") + ' Just Shortlisted you',
+        title: (targetUser.name.name?.split(" ")[0] || "") + ' Just Shortlisted you',
         messageBody: 'click here now or see in dashboard',
         imageUrl: targetUser.profilePictureUrls[0],
         senderName: targetUser.name,

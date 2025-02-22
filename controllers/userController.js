@@ -458,7 +458,7 @@ exports.viewProfile = async (req, res) => {
         const user = await User.findOne({ userId: viewerId });
         const payload = {
             topic: viewedUserId,
-            title: user.name + 'Just view your profile',
+            title: (user.name?.split(" ")[0] || "") + " Just viewed your profile",
             messageBody: 'click here now or see in dashboard',
             imageUrl: user.profilePictureUrls[0],
             senderName: '',
@@ -574,7 +574,7 @@ exports.showInterest = async (req, res) => {
 
             const payload = {
                 topic: interestedUserId.toLowerCase(),
-                title: targetUser.name + ' Accept your intrest',
+                title: (targetUser.name.name?.split(" ")[0] || "") + ' Accept your intrest',
                 messageBody: 'click here now or see in dashboard',
                 imageUrl: targetUser.profilePictureUrls[0],
                 senderName: targetUser.name,
@@ -611,7 +611,7 @@ exports.showInterest = async (req, res) => {
         const user = await User.findOne({ userId: interestedUserId });
         const payload = {
             topic: targetUserId,
-            title: user.name + 'Send you intrest',
+            title: (user.name.name?.split(" ")[0] || "") + 'Send you intrest',
             messageBody: 'click here now or see in dashboard',
             imageUrl: user.profilePictureUrls[0],
             senderName: '',
@@ -753,7 +753,7 @@ exports.addContact = async (req, res) => {
         const otherUser = await User.findOne({ userId: contactUserId });
         const payload = {
             topic: myUserId,
-            title: otherUser.name + ' Added you as a contact',
+            title: (otherUser.name.name?.split(" ")[0] || "") + ' Added you as a contact',
             messageBody: 'click here now or see in dashboard',
             imageUrl: otherUser.profilePictureUrls[0],
             senderName: '',
@@ -762,7 +762,7 @@ exports.addContact = async (req, res) => {
         };
         const payloadOtherUser = {
             topic: contactUserId,
-            title: user.name + ' Added you as a contact',
+            title: (user.name.name?.split(" ")[0] || "") + ' Added you as a contact',
             messageBody: 'click here now or see in dashboard',
             imageUrl: myUserId.profilePictureUrls[0],
             senderName: user.name,

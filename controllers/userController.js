@@ -879,7 +879,7 @@ exports.addShortlisted = async (req, res) => {
         const targetUser = await
         User.findOne({
             userId
-                : shortListUserId
+                : myUserId
         });
 
     const payload = {

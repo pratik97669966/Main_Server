@@ -12,7 +12,7 @@ const mongoose = require('mongoose');
 const moment = require('moment');
 const AWS = require('aws-sdk');
 const { name } = require('ejs');
-const callApi = require('../config/callApi');
+const callApi = require('../config/callApi').default;
 AWS.config.update({
     accessKeyId: 'AKIA5WLTSZQIW4RH465S',
     secretAccessKey: '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',
@@ -559,7 +559,7 @@ exports.showInterest = async (req, res) => {
             };
             callApi(fcmUrl, payload)
                 .then(response => {
-                    
+
                 })
                 .catch(error => {
 
@@ -595,7 +595,7 @@ exports.showInterest = async (req, res) => {
         };
         callApi(fcmUrl, payload)
             .then(response => {
-                
+
             })
             .catch(error => {
 

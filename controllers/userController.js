@@ -876,6 +876,28 @@ exports.addShortlisted = async (req, res) => {
             { date: new Date() },
             { new: true, upsert: true }
         );
+        const targetUser = await
+        User.findOne({
+            userId
+                : shortListUserId
+        });
+
+    const payload = {
+        topic: shortListUserId.toLowerCase(),
+        title: (myUserId.name.name?.split(" ")[0] || "") + ' Just Shortlisted you',
+        messageBody: 'click here now or see in dashboard',
+        imageUrl: targetUser.profilePictureUrls[0],
+        senderName: targetUser.name,
+        senderId: myUserId,
+        name: targetUser.name,
+    };
+    callApi(fcmUrl, payload)
+        .then(response => {
+
+        })
+        .catch(error => {
+
+        });
         res.status(200).json({ view });
     } catch (error) {
         res.status(500).json({ error: error.message });

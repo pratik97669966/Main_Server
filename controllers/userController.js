@@ -889,7 +889,6 @@ exports.viewContact = async (req, res) => {
     }
     try {
         if (isRequestApprove) {
-            // if its true then deduct noOfcontacts from viewContactUserId
             const user = await User.findOne({ userId: viewContactUserId });
             await User.findOneAndUpdate(
                 { userId: viewContactUserId },

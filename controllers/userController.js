@@ -2,6 +2,7 @@
 const Sequence = require('../models/Sequence');
 const User = require('../models/User');
 const IWantCustomer = require('../models/IWantCustomer');
+const Business = require('../models/IWantBusiness'); // Import the Business model
 const Interest = require('../models/Interest');
 const Block = require('../models/Block');
 const MyContacts = require('../models/MyContacts');
@@ -436,7 +437,6 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
-const Business = require('../models/Business'); // Import the Business model
 const IWantBusiness = require('../models/IWantBusiness');
 
 exports.iwant = async (req, res) => {

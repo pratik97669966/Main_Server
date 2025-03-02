@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
 
 const IwantBusinessSchema = new mongoose.Schema({
+    businessId: { type: String, required: true },
     businessNumber: { type: String, required: true },
     businessName: { type: String, required: true },
+    customerContactNumber: { type: String, required: true },
     date: { type: Date, default: Date.now },
     requestNote: { type: String, required: true },
     businessList: [{

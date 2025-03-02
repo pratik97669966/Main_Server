@@ -9,7 +9,9 @@ const IwantCustomerSchema = new mongoose.Schema({
     requestNote: { type: String, required: true },
     businessList:[{
         businessNumber:{ type: String, required: true },
+        businessId:{ type: String, required: true },
         businessName:{ type: String, required: true },
+        customerContactNumber:{ type: String, required: true },
     }]
 });
 

@@ -457,10 +457,8 @@ exports.iwant = async (req, res) => {
 
         // Iterate over the businessList and send notifications using map
         const notificationPromises = businessList.map(async (business) => {
-            const businessDetails = await Business.findOne({ businessNumber: business.businessNumber });
 
-            if (businessDetails) {
-                // Always create a new record
+            if (business) {
                 const data = new IWantBusiness({
                     customerMobile,
                     customerName,
@@ -469,8 +467,6 @@ exports.iwant = async (req, res) => {
                     requestNote,
                     date: new Date()
                 });
-
-                // Check if there is a recent record for this customer
                 const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
                 const recentRecord = await IWantBusiness.findOne({
                     customerMobile,
@@ -478,7 +474,6 @@ exports.iwant = async (req, res) => {
                 });
 
                 if (recentRecord) {
-                    // Update the existing record
                     recentRecord.customerName = customerName;
                     recentRecord.customerSearchKeywords = customerSearchKeywords;
                     recentRecord.customerUid = customerUid;
@@ -488,24 +483,25 @@ exports.iwant = async (req, res) => {
                 } else {
                     // Save a new record
                     await data.save();
+                    const payload = {
+                        topic: "User" + business.businessNumber,
+                        title: `new lead from ${customerName}`,
+                        messageBody: requestNote,
+                        senderName: customerName,
+                        senderId: customerMobile,
+                        name: customerName,
+                    };
+                    console.log("payload", payload);
+                    return callApi(fcmUrl, payload)
+                        .then(response => {
+                            console.log('Notification sent:', response);
+                        })
+                        .catch(error => {
+                            console.error('Error sending notification:', error);
+                        });
                 }
 
-                const payload = {
-                    topic: "User" + business.businessNumber,
-                    title: `new lead from ${customerName}`,
-                    messageBody: requestNote,
-                    senderName: customerName,
-                    senderId: customerMobile,
-                    name: customerName,
-                };
 
-                return callApi(fcmUrl, payload)
-                    .then(response => {
-                        console.log('Notification sent:', response);
-                    })
-                    .catch(error => {
-                        console.error('Error sending notification:', error);
-                    });
             }
         });
 

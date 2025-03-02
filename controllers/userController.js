@@ -508,7 +508,7 @@ exports.iwant = async (req, res) => {
         // Wait for all notifications to be sent
         await Promise.all(notificationPromises);
 
-        res.status(200).json({ view });
+        res.status(200).json( view );
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

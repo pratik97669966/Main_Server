@@ -38,10 +38,10 @@ app.use('/android/:userId', (req, res) => {
     const userId = req.params.userId;
 
     // Construct the deep link URL
-    const deepLinkUrl = `kartavyavivahbandhan://user/${userId}`;
+    const deepLinkUrl = `dukanbikan://user/${userId}`;
 
     // Construct the Play Store URL
-    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.kartavya.vivahbandhan'; // Replace with your app's package name
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.deal2funservice&hl=en_IN'; // Replace with your app's package name
 
     // Serve an HTML page to handle the redirection logic
     const htmlContent = `
@@ -109,7 +109,7 @@ app.post('/upload/image', upload.single('image'), async (req, res) => {
 });
 app.use((req, res) => {
     // Construct the Play Store URL
-    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.kartavya.vivahbandhan'; // Replace with your app's package name
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.deal2funservice&hl=en_IN';
 
     // Serve an HTML page to handle the redirection logic
     const htmlContent = `

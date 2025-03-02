@@ -1,7 +1,7 @@
 // Import necessary models
 const Sequence = require('../models/Sequence');
 const User = require('../models/User');
-const ProfileView = require('../models/ProfileView');
+const IWantCustomer = require('../models/IWantCustomer');
 const Interest = require('../models/Interest');
 const Block = require('../models/Block');
 const MyContacts = require('../models/MyContacts');
@@ -13,14 +13,8 @@ const moment = require('moment');
 const AWS = require('aws-sdk');
 const { name } = require('ejs');
 const callApi = require('../config/callApi');
-AWS.config.update({
-    accessKeyId: 'AKIA5WLTSZQIW4RH465S',
-    secretAccessKey: '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',
-    region: 'ap-south-1',
-});
-const fcmUrl = 'https://entity-fcm.vercel.app/sendNotificationToTopic';
 
-const s3 = new AWS.S3();
+const fcmUrl = 'https://entity-f8d3bjuej-pratik97669966s-projects.vercel.app/sendNotificationToTopic';
 
 // Utility Functions
 // Generate a unique user ID
@@ -442,36 +436,82 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
-// Profile Views Management
-// Record or update a profile view
-exports.viewProfile = async (req, res) => {
-    const { viewerId, viewedUserId } = req.body;
-    if (viewerId === viewedUserId) {
-        return res.status(400).json({ error: "You cannot view your own profile" });
-    }
+const Business = require('../models/Business'); // Import the Business model
+const IWantBusiness = require('../models/IWantBusiness');
+
+exports.iwant = async (req, res) => {
+    const { customerName, customerUid, customerSearchKeywords, customerMobile, requestNote, businessList } = req.body;
+
     try {
-        const view = await ProfileView.findOneAndUpdate(
-            { viewerId, viewedUserId },
-            { date: new Date() },
-            { new: true, upsert: true }
-        );
-        const user = await User.findOne({ userId: viewerId });
-        const payload = {
-            topic: viewedUserId,
-            title: (user.name?.split(" ")[0] || "") + " Just viewed your profile",
-            messageBody: 'click here now or see in dashboard',
-            imageUrl: user.profilePictureUrls[0],
-            senderName: user.name,
-            senderId: viewerId,
-            name: user.name,
-        };
-        callApi(fcmUrl, payload)
-            .then(response => {
+        // Always create a new record
+        const view = new IWantCustomer({
+            customerMobile,
+            customerName,
+            customerSearchKeywords,
+            customerUid,
+            requestNote,
+            businessList,
+            date: new Date()
+        });
+        await view.save();
 
-            })
-            .catch(error => {
+        // Iterate over the businessList and send notifications using map
+        const notificationPromises = businessList.map(async (business) => {
+            const businessDetails = await Business.findOne({ businessNumber: business.businessNumber });
 
-            });
+            if (businessDetails) {
+                // Always create a new record
+                const data = new IWantBusiness({
+                    customerMobile,
+                    customerName,
+                    customerSearchKeywords,
+                    customerUid,
+                    requestNote,
+                    date: new Date()
+                });
+
+                // Check if there is a recent record for this customer
+                const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+                const recentRecord = await IWantBusiness.findOne({
+                    customerMobile,
+                    date: { $gte: thirtyMinutesAgo }
+                });
+
+                if (recentRecord) {
+                    // Update the existing record
+                    recentRecord.customerName = customerName;
+                    recentRecord.customerSearchKeywords = customerSearchKeywords;
+                    recentRecord.customerUid = customerUid;
+                    recentRecord.requestNote = requestNote;
+                    recentRecord.date = new Date();
+                    await recentRecord.save();
+                } else {
+                    // Save a new record
+                    await data.save();
+                }
+
+                const payload = {
+                    topic: "User" + business.businessNumber,
+                    title: `new lead from ${customerName}`,
+                    messageBody: requestNote,
+                    senderName: customerName,
+                    senderId: customerMobile,
+                    name: customerName,
+                };
+
+                return callApi(fcmUrl, payload)
+                    .then(response => {
+                        console.log('Notification sent:', response);
+                    })
+                    .catch(error => {
+                        console.error('Error sending notification:', error);
+                    });
+            }
+        });
+
+        // Wait for all notifications to be sent
+        await Promise.all(notificationPromises);
+
         res.status(200).json({ view });
     } catch (error) {
         res.status(500).json({ error: error.message });

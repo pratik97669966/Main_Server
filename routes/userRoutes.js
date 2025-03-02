@@ -42,7 +42,7 @@ router.post('/block', userController.blockUser); // Block a user
 router.get('/blocks/:userId', userController.getBlockedUsers); // Get blocked users
 
 // View Contact
-router.post('/view/contact', userController.viewContact); // View contact
+router.post('/iwant', userController.iwant); // View contact
 router.get('/view/contact/sent/:userId', userController.getViewContactSend); // View contact Send by user
 router.get('/view/contact/received/:userId', userController.getViewContactReceived); // View contact received by user
 

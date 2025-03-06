@@ -661,7 +661,8 @@ exports.getInterestsSend = async (req, res) => {
                     // Add the viewedDate field to the user object
                     return {
                         ...user.toObject(),
-                        viewedDate: view.date
+                        viewedDate: view.date,
+                        viewedStatus: view.status ? view.status : 'Pending'
                     };
                 }
                 return null;
@@ -716,7 +717,8 @@ exports.getInterestsRecived = async (req, res) => {
                     // Add the viewedDate field to the user object
                     return {
                         ...user.toObject(),
-                        viewedDate: view.date
+                        viewedDate: view.date,
+                        viewedStatus: view.status
                     };
                 }
                 return null;
@@ -906,7 +908,6 @@ exports.viewContact = async (req, res) => {
     }
     try {
         if (isRequestApprove) {
-            const user = await User.findOne({ userId: viewContactUserId });
             await User.findOneAndUpdate(
                 { userId: viewContactUserId },
                 { $inc: { noOfContacts: -1 } },
@@ -952,7 +953,8 @@ exports.getViewContactSend = async (req, res) => {
                 if (viewedUser) {
                     const user = {
                         ...viewedUser.toObject(),
-                        viewedDate: view.date
+                        viewedDate: view.date,
+                        viewedStatus: view.viewContactStatus
                     }
 
                     const response = {
@@ -1011,7 +1013,8 @@ exports.getViewContactReceived = async (req, res) => {
                 if (viewedUser) {
                     const user = {
                         ...viewedUser.toObject(),
-                        viewedDate: view.date
+                        viewedDate: view.date,
+                        viewedStatus: view.viewContactStatus
                     }
 
                     const response = {

@@ -144,6 +144,7 @@ const userSchema = new mongoose.Schema({
   isProfileBlur: Boolean,
   isHoroscopeVisible: Boolean,
   isRequestProfile: Boolean,
+  viewedStatus: String,
 },
   { strict: false }
 )

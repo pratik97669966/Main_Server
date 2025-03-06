@@ -604,7 +604,7 @@ exports.showInterest = async (req, res) => {
         }
 
         const interest = await Interest.findOneAndUpdate(
-            { interestedUserId, targetUserId },
+            { interestedUserId, targetUserId, status },
             { date: new Date() },
             { new: true, upsert: true }
         );

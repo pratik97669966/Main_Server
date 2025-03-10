@@ -161,7 +161,7 @@ exports.getCustomersByBusinessMobile = async (req, res) => {
             { $unwind: "$customerList" },
             { $sort: { "customerList.date": -1 } },
             { $skip: skip },
-            { $limit: limit },
+            { $limit: parseInt(limit) },
             {
                 $group: {
                     _id: "$_id",

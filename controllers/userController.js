@@ -4,7 +4,7 @@ const IWantBusiness = require('../models/IWantBusiness');
 
 const callApi = require('../config/callApi');
 
-const fcmUrl = 'https://entity-f8d3bjuej-pratik97669966s-projects.vercel.app/sendNotificationToTopic';
+const fcmUrl = 'https://entity-fcm-git-dukanbikan-fcm-pratik97669966s-projects.vercel.app/sendNotificationToTopic';
 
 exports.iwant = async (req, res) => {
     const { customerName, customerUid, customerSearchKeywords, customerMobile, requestNote, businessList } = req.body;

@@ -26,7 +26,16 @@ exports.iwant = async (req, res) => {
         const notificationPromises = businessList.map(async (business) => {
             if (business) {
                 const businessRecord = await IWantBusiness.findOne({ businessNumber: business.businessNumber });
-
+                if (!businessRecord) {
+                    // Create a new business record if it does not exist
+                    businessRecord = await new IWantBusiness({
+                        businessNumber: business.businessNumber,
+                        businessId: business.businessId,
+                        businessName: business.businessName,
+                        customerContactNumber: business.customerContactNumber,
+                        customerList: []
+                    });
+                }
                 if (businessRecord) {
                     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
                     const recentCustomerRecord = await IWantBusiness.findOne({
@@ -46,7 +55,7 @@ exports.iwant = async (req, res) => {
                         customer.requestNote = requestNote;
                         customer.date = new Date();
                     } else {
-                        // Add a new customer record
+
                         businessRecord.customerList.push({
                             customerName,
                             customerUid,
@@ -114,22 +123,24 @@ exports.getCustomersByBusinessMobile = async (req, res) => {
     const skip = (page - 1) * limit;
 
     try {
-        const business = await IWantBusiness.findOne({ customerContactNumber: businessMobile });
+        const business = await IWantBusiness.findOne({ businessNumber: businessMobile });
         if (!business) {
             return res.status(404).json({ error: 'Business not found' });
         }
 
         const totalCustomers = business.customerList.length;
         const customers = await IWantBusiness.aggregate([
-            { $match: { customerContactNumber: businessMobile } },
+            { $match: { businessNumber: businessMobile } },
             { $unwind: "$customerList" },
             { $sort: { "customerList.date": -1 } },
             { $skip: skip },
             { $limit: limit },
-            { $group: {
-                _id: "$_id",
-                customerList: { $push: "$customerList" }
-            }},
+            {
+                $group: {
+                    _id: "$_id",
+                    customerList: { $push: "$customerList" }
+                }
+            },
             { $project: { customerList: 1, _id: 0 } }
         ]);
 

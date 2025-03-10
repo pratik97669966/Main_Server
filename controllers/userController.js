@@ -26,16 +26,7 @@ exports.iwant = async (req, res) => {
         const notificationPromises = businessList.map(async (business) => {
             if (business) {
                 const businessRecord = await IWantBusiness.findOne({ businessNumber: business.businessNumber });
-                if (!businessRecord) {
-                    // Create a new business record if it does not exist
-                    businessRecord = await new IWantBusiness({
-                        businessNumber: business.businessNumber,
-                        businessId: business.businessId,
-                        businessName: business.businessName,
-                        customerContactNumber: business.customerContactNumber,
-                        customerList: []
-                    });
-                }
+
                 if (businessRecord) {
                     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
                     const recentCustomerRecord = await IWantBusiness.findOne({
@@ -67,6 +58,42 @@ exports.iwant = async (req, res) => {
                     }
 
                     await businessRecord.save();
+
+                    const payload = {
+                        topic: "User" + business.businessNumber,
+                        title: `new lead from ${customerName}`,
+                        messageBody: requestNote,
+                        senderName: customerName,
+                        senderId: customerMobile,
+                        name: customerName,
+                    };
+                    console.log("payload", payload);
+                    await callApi(fcmUrl, payload)
+                        .then(response => {
+                            console.log('Notification sent:', response);
+                        })
+                        .catch(error => {
+                            console.error('Error sending notification:', error);
+                        });
+                } else {
+                    // Create a new business record if it does not exist
+                    const businessRecordNew = new IWantBusiness({
+                        businessNumber: business.businessNumber,
+                        businessId: business.businessId,
+                        businessName: business.businessName,
+                        customerContactNumber: business.customerContactNumber,
+                        customerList: []
+                    });
+
+                    businessRecordNew.customerList.push({
+                        customerName,
+                        customerUid,
+                        customerSearchKeywords,
+                        customerMobile,
+                        requestNote,
+                        date: new Date()
+                    });
+                    await businessRecordNew.save();
 
                     const payload = {
                         topic: "User" + business.businessNumber,

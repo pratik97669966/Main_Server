@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 
-// View Contact
-router.post('/iwant', userController.iwant); // View contact
+// iwant Save customer record
+router.post('/iwant', userController.iwant); // iwant is the function name in userController.js
 
 // Get all IWantCustomers with pagination
 router.get('/iwantcustomers', userController.getAllIWantCustomers);

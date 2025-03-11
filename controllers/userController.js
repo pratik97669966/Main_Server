@@ -145,8 +145,8 @@ exports.getAllIWantCustomers = async (req, res) => {
 };
 exports.getCustomersByBusinessMobile = async (req, res) => {
     const { businessMobile } = req.params;
-    // const { page = 1, limit = 10 } = req.query;
-    // const skip = (page - 1) * limit;
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
 
     try {
         const business = await IWantBusiness.findOne({ businessNumber: businessMobile });
@@ -154,14 +154,13 @@ exports.getCustomersByBusinessMobile = async (req, res) => {
             return res.status(404).json({ error: 'Business not found' });
         }
 
-        // const totalCustomers = business.customerList.length;
+        const totalCustomers = business.customerList.length;
         const customers = await IWantBusiness.aggregate([
             { $match: { businessNumber: businessMobile } },
             { $unwind: "$customerList" },
             { $sort: { "customerList.date": -1 } },
-            
-            // { $skip: skip },
-            // { $limit: parseInt(limit) },
+            { $skip: skip },
+            { $limit: parseInt(limit) },
             {
                 $group: {
                     _id: "$_id",
@@ -176,7 +175,7 @@ exports.getCustomersByBusinessMobile = async (req, res) => {
         //     customers: ,
         // };
 
-        res.json(customers[0] ? customers[0].customerList : []);
+        res.status(200).json(customers[0] ? customers[0].customerList : []);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

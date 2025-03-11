@@ -27,7 +27,7 @@ exports.iwant = async (req, res) => {
             if (business) {
                 const businessRecord = await IWantBusiness.findOne({ businessNumber: business.businessNumber });
 
-                if (businessRecord) {
+                if (businessRecord && customerSearchKeywords.includes("I am interested for ")) {
                     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
                     const recentCustomerRecord = await IWantBusiness.findOne({
                         businessNumber: business.businessNumber,

@@ -147,7 +147,7 @@ exports.updateIWantCustomerById = async (req, res) => {
             await businessRecord.save();
         }
 
-        res.status(200).json(businessRecord);
+        res.status(200).json(req.body);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

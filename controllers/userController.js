@@ -123,6 +123,36 @@ exports.iwant = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+// iwant update by id
+exports.updateIWantCustomerById = async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    try {
+        // const updatedCustomer = await IWantCustomer.findByIdAndUpdate(
+        //     id,
+        //     { status },
+        //     { new: true }
+        // );
+
+        // if (!updatedCustomer) {
+        //     return res.status(404).json({ error: 'Customer not found' });
+        // }
+
+        // Update the status in the business record as well
+        const businessRecord = await IWantBusiness.findOne({ 'customerList._id': id });
+        if (businessRecord) {
+            const customer = businessRecord.customerList.id(id);
+            customer.status = status;
+            await businessRecord.save();
+        }
+
+        res.status(200).json(businessRecord);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}; 
+
 exports.getAllIWantCustomers = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;

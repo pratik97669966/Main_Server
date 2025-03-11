@@ -5,6 +5,9 @@ const userController = require('../controllers/userController');
 // iwant Save customer record
 router.post('/iwant', userController.iwant); // iwant is the function name in userController.js
 
+// iwant update by id
+router.put('/iwant/:id', userController.updateIWantCustomerById);
+
 // Get all IWantCustomers with pagination
 router.get('/iwantcustomers', userController.getAllIWantCustomers);
 

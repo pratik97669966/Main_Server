@@ -7,6 +7,7 @@ const IwantCustomerSchema = new mongoose.Schema({
     customerMobile: { type: String, required: true },
     date: { type: Date, default: Date.now },
     requestNote: { type: String, required: true },
+    status: { type: String, default: 'Pending', enum: ['Pending', 'Accepted', 'Rejected'] },
     businessList:[{
         businessNumber:{ type: String, required: true },
         businessId:{ type: String, required: true },

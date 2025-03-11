@@ -58,14 +58,15 @@ exports.iwant = async (req, res) => {
                     }
 
                     await businessRecord.save();
-
                     const payload = {
                         topic: "User" + business.businessNumber,
                         title: `new lead from ${customerName}`,
                         messageBody: requestNote,
+                        image_url: "https://www.marthastewart.com/thmb/yhgiLuSTcFaN1WbwUua_W9SMHws=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/prettiest-flowers-painted-tongue-flower-lead-getty-1123-00763085ad384a9b9bf1f5cc81bee390.jpg",
                         senderName: customerName,
                         senderId: customerMobile,
                         name: customerName,
+                        notification_type: "NOTIFICATION"
                     };
                     console.log("payload", payload);
                     await callApi(fcmUrl, payload)
@@ -99,9 +100,11 @@ exports.iwant = async (req, res) => {
                         topic: "User" + business.businessNumber,
                         title: `new lead from ${customerName}`,
                         messageBody: requestNote,
+                        image_url: "https://www.marthastewart.com/thmb/yhgiLuSTcFaN1WbwUua_W9SMHws=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/prettiest-flowers-painted-tongue-flower-lead-getty-1123-00763085ad384a9b9bf1f5cc81bee390.jpg",
                         senderName: customerName,
                         senderId: customerMobile,
                         name: customerName,
+                        notification_type: "NOTIFICATION"
                     };
                     console.log("payload", payload);
                     await callApi(fcmUrl, payload)
@@ -151,7 +154,7 @@ exports.updateIWantCustomerById = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}; 
+};
 
 exports.getAllIWantCustomers = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;

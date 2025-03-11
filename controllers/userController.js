@@ -176,7 +176,7 @@ exports.getCustomersByBusinessMobile = async (req, res) => {
         //     customers: ,
         // };
 
-        res.status(200).json(customers[0] ? customers[0].customerList : []);
+        res.json(customers[0] ? customers[0].customerList : []);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

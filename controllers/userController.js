@@ -170,12 +170,12 @@ exports.getCustomersByBusinessMobile = async (req, res) => {
             { $project: { customerList: 1, _id: 0 } }
         ]);
 
-        // const response = {
-        //     page: { totalPages: Math.ceil(totalCustomers / limit), currentPage: page },
-        //     customers: ,
-        // };
+        const response = {
+            page: { totalPages: Math.ceil(totalCustomers / limit), currentPage: page },
+            customers: customers[0] ? customers[0].customerList : [],
+        };
 
-        res.status(200).json(customers[0] ? customers[0].customerList : []);
+        res.status(200).json(response);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

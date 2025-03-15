@@ -66,6 +66,7 @@ exports.iwant = async (req, res) => {
                         senderName: customerName,
                         senderId: customerMobile,
                         name: customerName,
+                        payload: {},
                         notification_type: "LEADS",
                         navigate_to: "LEADS"
                     };
@@ -105,6 +106,7 @@ exports.iwant = async (req, res) => {
                         senderName: customerName,
                         senderId: customerMobile,
                         name: customerName,
+                        payload: {},
                         notification_type: "LEADS",
                         navigate_to: "LEADS"
                     };

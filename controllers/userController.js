@@ -66,7 +66,7 @@ exports.iwant = async (req, res) => {
                         senderName: customerName,
                         senderId: customerMobile,
                         name: customerName,
-                        notification_type: "NOTIFICATION"
+                        notification_type: "LEADS"
                     };
                     console.log("payload", payload);
                     await callApi(fcmUrl, payload)
@@ -104,7 +104,7 @@ exports.iwant = async (req, res) => {
                         senderName: customerName,
                         senderId: customerMobile,
                         name: customerName,
-                        notification_type: "NOTIFICATION"
+                        notification_type: "LEADS"
                     };
                     console.log("payload", payload);
                     await callApi(fcmUrl, payload)

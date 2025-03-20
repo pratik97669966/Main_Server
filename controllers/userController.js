@@ -415,7 +415,7 @@ exports.searchByName = async (req, res) => {
                 filter.name = { $regex: name, $options: "i" };
             }
         }
-        const users = await User.find(filter).exec();
+        const users = await User.find(filter).sort({ activationDate: -1 }).exec();
         res.status(200).json(users);
     } catch (error) {
         console.error("Error searching users by name:", error.message);

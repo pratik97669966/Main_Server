@@ -12,7 +12,7 @@ exports.businessSubscriber = async (req, res) => {
 
     try {
         // Check if the business exists
-        const existingBusiness = await BusinessSubscriber.findOne({ businessNumber });
+        let existingBusiness = await BusinessSubscriber.findOne({ businessNumber });
 
         if (!existingBusiness) {
             // Create a new business record if it does not exist
@@ -26,63 +26,72 @@ exports.businessSubscriber = async (req, res) => {
 
             await newBusiness.save();
 
-           
             const payload = {
                 topic: "User" + businessNumber,
                 title: `New Subscribers for ${businessName}`,
-                messageBody: `${newSubscribers.length} new subscribers have joined.`,
-                notification_type: "NEW_SUBSCRIBERS",
+                messageBody: `${customerList.length} new subscribers have joined.`,
+                notification_type: "LEADS",
                 navigate_to: "SUBSCRIBERS_LIST"
             };
+
             await callApi(fcmUrl, payload)
-                .then(response => {
-                    console.log('Notification sent:', response);
-                })
-                .catch(error => {
-                    console.error('Error sending notification:', error);
-                });
+                .then(response => console.log('Notification sent:', response))
+                .catch(error => console.error('Error sending notification:', error));
+
             return res.status(201).json({ message: 'Business created successfully.', business: newBusiness });
         }
 
-        // Update the existing business with new subscribers
+        // Ensure unique customers (update existing ones, add new ones)
+        const updatedCustomerList = [...existingBusiness.customerList];
+
+        customerList.forEach(newCustomer => {
+            const existingIndex = updatedCustomerList.findIndex(
+                customer => customer.customerMobile === newCustomer.customerMobile
+            );
+
+            if (existingIndex !== -1) {
+                // Update existing customer details
+                updatedCustomerList[existingIndex] = { ...updatedCustomerList[existingIndex], ...newCustomer };
+            } else {
+                // Add new customer
+                updatedCustomerList.push(newCustomer);
+            }
+        });
+
+        // Update business with unique customers
         const updateResult = await BusinessSubscriber.findOneAndUpdate(
             { businessNumber },
             {
-                $set: { businessId, businessName, customerContactNumber },
-                $addToSet: { customerList: { $each: customerList } }
+                $set: { businessId, businessName, customerContactNumber, customerList: updatedCustomerList }
             },
             { new: true }
         );
 
-        // Send notification for new subscribers
-        const newSubscribers = customerList.filter(customer => {
-            return !existingBusiness.customerList.some(existingCustomer => existingCustomer.customerMobile === customer.customerMobile);
-        });
+        // Identify truly new subscribers for notification
+        const newSubscribers = customerList.filter(newCustomer => 
+            !existingBusiness.customerList.some(existingCustomer => existingCustomer.customerMobile === newCustomer.customerMobile)
+        );
 
         if (newSubscribers.length > 0) {
             const payload = {
                 topic: "User" + businessNumber,
                 title: `New Subscribers for ${businessName}`,
                 messageBody: `${newSubscribers.length} new subscribers have joined.`,
-                notification_type: "NEW_SUBSCRIBERS",
+                notification_type: "LEADS",
                 navigate_to: "SUBSCRIBERS_LIST"
             };
 
-            console.log("payload", payload);
             await callApi(fcmUrl, payload)
-                .then(response => {
-                    console.log('Notification sent:', response);
-                })
-                .catch(error => {
-                    console.error('Error sending notification:', error);
-                });
+                .then(response => console.log('Notification sent:', response))
+                .catch(error => console.error('Error sending notification:', error));
         }
 
-        res.status(200).json({ message: 'Subscribers added successfully.', business: updateResult });
+        res.status(200).json({ message: 'Subscribers updated successfully.', business: updateResult });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
 exports.getSubscribersByBusinessMobile = async (req, res) => {
     const { businessMobile } = req.params;
     const { page = 1, limit = 10 } = req.query;

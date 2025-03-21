@@ -83,6 +83,48 @@ exports.businessSubscriber = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+exports.getSubscribersByBusinessMobile = async (req, res) => {
+    const { businessMobile } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    try {
+        const business = await BusinessSubscriber.findOne({ businessNumber: businessMobile });
+
+        if (!business) {
+            return res.status(404).json({ error: 'Business not found' });
+        }
+
+        const totalSubscribers = business.customerList.length;
+        const subscribers = business.customerList.slice(skip, skip + parseInt(limit));
+
+        const response = {
+            page: { totalPages: Math.ceil(totalSubscribers / parseInt(limit)), currentPage: parseInt(page) },
+            subscribers,
+        };
+
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.getSubscriberCount = async (req, res) => {
+    const { businessMobile } = req.params;
+
+    try {
+        const business = await BusinessSubscriber.findOne({ businessNumber: businessMobile });
+
+        if (!business) {
+            return res.status(404).json({ error: 'Business not found' });
+        }
+
+        const subscriberCount = business.customerList.length;
+
+        res.status(200).json({ businessMobile, subscriberCount });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 exports.iwant = async (req, res) => {
     const { customerName, customerUid, customerSearchKeywords, customerMobile, requestNote, businessList } = req.body;

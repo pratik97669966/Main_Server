@@ -5,6 +5,12 @@ const userController = require('../controllers/userController');
 // Save business subscriber
 router.post('/business/subscribe', userController.businessSubscriber);
 
+// Get subscriber count for a business
+router.get('/business/:businessMobile/subscriberCount', userController.getSubscriberCount);
+
+// Get list of subscribers for a business
+router.get('/business/:businessMobile/subscribers', userController.getSubscribersByBusinessMobile);
+
 // iwant Save customer record
 router.post('/iwant', userController.iwant); // iwant is the function name in userController.js
 

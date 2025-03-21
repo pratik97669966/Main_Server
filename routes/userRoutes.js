@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 
+// Save business subscriber
+router.post('/business/subscribe', userController.businessSubscriber);
+
 // iwant Save customer record
 router.post('/iwant', userController.iwant); // iwant is the function name in userController.js
 

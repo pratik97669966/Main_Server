@@ -1,10 +1,88 @@
 // Import necessary models
 const IWantCustomer = require('../models/IWantCustomer');
 const IWantBusiness = require('../models/IWantBusiness');
+const BusinessSubscriber = require('../models/BusinessSubscriber');
 
 const callApi = require('../config/callApi');
 
 const fcmUrl = 'https://entity-fcm-git-dukanbikan-fcm-pratik97669966s-projects.vercel.app/sendNotificationToTopic';
+
+exports.businessSubscriber = async (req, res) => {
+    const { businessNumber, businessId, businessName, customerContactNumber, customerList } = req.body;
+
+    try {
+        // Check if the business exists
+        const existingBusiness = await BusinessSubscriber.findOne({ businessNumber });
+
+        if (!existingBusiness) {
+            // Create a new business record if it does not exist
+            const newBusiness = new BusinessSubscriber({
+                businessNumber,
+                businessId,
+                businessName,
+                customerContactNumber,
+                customerList
+            });
+
+            await newBusiness.save();
+
+           
+            const payload = {
+                topic: "User" + businessNumber,
+                title: `New Subscribers for ${businessName}`,
+                messageBody: `${newSubscribers.length} new subscribers have joined.`,
+                notification_type: "NEW_SUBSCRIBERS",
+                navigate_to: "SUBSCRIBERS_LIST"
+            };
+            await callApi(fcmUrl, payload)
+                .then(response => {
+                    console.log('Notification sent:', response);
+                })
+                .catch(error => {
+                    console.error('Error sending notification:', error);
+                });
+            return res.status(201).json({ message: 'Business created successfully.', business: newBusiness });
+        }
+
+        // Update the existing business with new subscribers
+        const updateResult = await BusinessSubscriber.findOneAndUpdate(
+            { businessNumber },
+            {
+                $set: { businessId, businessName, customerContactNumber },
+                $addToSet: { customerList: { $each: customerList } }
+            },
+            { new: true }
+        );
+
+        // Send notification for new subscribers
+        const newSubscribers = customerList.filter(customer => {
+            return !existingBusiness.customerList.some(existingCustomer => existingCustomer.customerMobile === customer.customerMobile);
+        });
+
+        if (newSubscribers.length > 0) {
+            const payload = {
+                topic: "User" + businessNumber,
+                title: `New Subscribers for ${businessName}`,
+                messageBody: `${newSubscribers.length} new subscribers have joined.`,
+                notification_type: "NEW_SUBSCRIBERS",
+                navigate_to: "SUBSCRIBERS_LIST"
+            };
+
+            console.log("payload", payload);
+            await callApi(fcmUrl, payload)
+                .then(response => {
+                    console.log('Notification sent:', response);
+                })
+                .catch(error => {
+                    console.error('Error sending notification:', error);
+                });
+        }
+
+        res.status(200).json({ message: 'Subscribers added successfully.', business: updateResult });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 exports.iwant = async (req, res) => {
     const { customerName, customerUid, customerSearchKeywords, customerMobile, requestNote, businessList } = req.body;
@@ -70,7 +148,6 @@ exports.iwant = async (req, res) => {
                         notification_type: "LEADS",
                         navigate_to: "LEADS"
                     };
-                    console.log("payload", payload);
                     await callApi(fcmUrl, payload)
                         .then(response => {
                             console.log('Notification sent:', response);

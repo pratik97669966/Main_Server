@@ -60,7 +60,7 @@ MongoClient.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true,
           user.id = socket.id;
           usersCollection.insertOne(user)
             .then(() => {
-              console.log(`User ${user.username} added to MongoDB`);
+              console.log(`Username- ${user.username} and name - ${user.name}  added to MongoDB`);
               io.emit('user-add', user);
             })
             .catch((err) => {

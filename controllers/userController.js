@@ -185,29 +185,29 @@ exports.iwant = async (req, res) => {
                             requestNote,
                             date: new Date()
                         });
-                        const payload = {
-                            topic: "User" + business.businessNumber,
-                            title: `new lead from ${customerName}`,
-                            messageBody: requestNote,
-                            image_url: "/thmb/yhgiLuSTcFaN1WbwUua_W9SMHws=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/prettiest-flowers-painted-tongue-flower-lead-getty-1123-00763085ad384a9b9bf1f5cc81bee390.jpg",
-                            senderName: customerName,
-                            senderId: customerMobile,
-                            name: customerName,
-                            payload: {},
-                            notification_type: "LEADS",
-                            navigate_to: "LEADS"
-                        };
-                        await callApi(fcmUrl, payload)
-                            .then(response => {
-                                console.log('Notification sent:', response);
-                            })
-                            .catch(error => {
-                                console.error('Error sending notification:', error);
-                            });
+                       
                     }
 
                     await businessRecord.save();
-
+                    const payload = {
+                        topic: "User" + business.businessNumber,
+                        title: `new lead from ${customerName}`,
+                        messageBody: requestNote,
+                        image_url: "/thmb/yhgiLuSTcFaN1WbwUua_W9SMHws=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/prettiest-flowers-painted-tongue-flower-lead-getty-1123-00763085ad384a9b9bf1f5cc81bee390.jpg",
+                        senderName: customerName,
+                        senderId: customerMobile,
+                        name: customerName,
+                        payload: {},
+                        notification_type: "LEADS",
+                        navigate_to: "LEADS"
+                    };
+                    await callApi(fcmUrl, payload)
+                        .then(response => {
+                            console.log('Notification sent:', response);
+                        })
+                        .catch(error => {
+                            console.error('Error sending notification:', error);
+                        });
                 } else {
                     // Create a new business record if it does not exist
                     const businessRecordNew = new IWantBusiness({

@@ -28,7 +28,7 @@ exports.businessSubscriber = async (req, res) => {
 
             const payload = {
                 topic: "User" + businessNumber,
-                title: `New Subscribers for ${businessName}`,
+                title: `New Subscriber ${customerList[0].customerName}`,
                 messageBody: `${customerList.length} new subscribers have joined.`,
                 notification_type: "LEADS",
                 navigate_to: "SUBSCRIBERS_LIST"
@@ -75,7 +75,7 @@ exports.businessSubscriber = async (req, res) => {
         if (newSubscribers.length > 0) {
             const payload = {
                 topic: "User" + businessNumber,
-                title: `New Subscribers for ${businessName}`,
+                title: `New Subscriber ${customerList[0].customerName}`,
                 messageBody: `${newSubscribers.length} new subscribers have joined.`,
                 notification_type: "LEADS",
                 navigate_to: "SUBSCRIBERS_LIST"
@@ -185,7 +185,7 @@ exports.iwant = async (req, res) => {
                             requestNote,
                             date: new Date()
                         });
-                       
+
                     }
 
                     await businessRecord.save();

@@ -68,7 +68,7 @@ exports.businessSubscriber = async (req, res) => {
         );
 
         // Identify truly new subscribers for notification
-        const newSubscribers = customerList.filter(newCustomer => 
+        const newSubscribers = customerList.filter(newCustomer =>
             !existingBusiness.customerList.some(existingCustomer => existingCustomer.customerMobile === newCustomer.customerMobile)
         );
 
@@ -156,7 +156,7 @@ exports.iwant = async (req, res) => {
             if (business) {
                 const businessRecord = await IWantBusiness.findOne({ businessNumber: business.businessNumber });
 
-                if (businessRecord && !customerSearchKeywords.includes("I am interested for ")) {
+                if (businessRecord && !requestNote.includes("I am interested for ")) {
                     const thirtyMinutesAgo = new Date(Date.now() - 1 * 60 * 1000);
                     const recentCustomerRecord = await IWantBusiness.findOne({
                         businessNumber: business.businessNumber,
@@ -184,28 +184,29 @@ exports.iwant = async (req, res) => {
                             requestNote,
                             date: new Date()
                         });
+                        const payload = {
+                            topic: "User" + business.businessNumber,
+                            title: `new lead from ${customerName}`,
+                            messageBody: requestNote,
+                            image_url: "/thmb/yhgiLuSTcFaN1WbwUua_W9SMHws=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/prettiest-flowers-painted-tongue-flower-lead-getty-1123-00763085ad384a9b9bf1f5cc81bee390.jpg",
+                            senderName: customerName,
+                            senderId: customerMobile,
+                            name: customerName,
+                            payload: {},
+                            notification_type: "LEADS",
+                            navigate_to: "LEADS"
+                        };
+                        await callApi(fcmUrl, payload)
+                            .then(response => {
+                                console.log('Notification sent:', response);
+                            })
+                            .catch(error => {
+                                console.error('Error sending notification:', error);
+                            });
                     }
 
                     await businessRecord.save();
-                    const payload = {
-                        topic: "User" + business.businessNumber,
-                        title: `new lead from ${customerName}`,
-                        messageBody: requestNote,
-                        image_url: "https://www.marthastewart.com/thmb/yhgiLuSTcFaN1WbwUua_W9SMHws=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/prettiest-flowers-painted-tongue-flower-lead-getty-1123-00763085ad384a9b9bf1f5cc81bee390.jpg",
-                        senderName: customerName,
-                        senderId: customerMobile,
-                        name: customerName,
-                        payload: {},
-                        notification_type: "LEADS",
-                        navigate_to: "LEADS"
-                    };
-                    await callApi(fcmUrl, payload)
-                        .then(response => {
-                            console.log('Notification sent:', response);
-                        })
-                        .catch(error => {
-                            console.error('Error sending notification:', error);
-                        });
+
                 } else {
                     // Create a new business record if it does not exist
                     const businessRecordNew = new IWantBusiness({
@@ -377,4 +378,3 @@ exports.getAllBusinessesWithCustomerCount = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-

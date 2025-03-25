@@ -98,32 +98,40 @@ exports.getSubscribersByBusinessMobile = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     try {
-        const business = await BusinessSubscriber.aggregate([
+        const business = await BusinessSubscriber.findOne({ businessNumber: businessMobile });
+
+        if (!business) {
+            return res.status(404).json({ error: 'Business not found' });
+        }
+
+        const totalSubscribers = business.customerList.length;
+
+        // Aggregate to sort and paginate customerList
+        const subscribersData = await BusinessSubscriber.aggregate([
             { $match: { businessNumber: businessMobile } },
-            { $unwind: "$customerList" }, // Convert array into individual documents
-            { $sort: { "customerList.date": -1 } }, // Sort by date in descending order
+            { $unwind: "$customerList" },
+            { $sort: { "customerList.date": -1 } }, // Sorting latest first
             { $skip: skip },
             { $limit: parseInt(limit) },
             {
                 $group: {
                     _id: "$_id",
                     subscribers: { $push: "$customerList" },
-                    totalSubscribers: { $sum: 1 }
                 }
             }
         ]);
 
-        if (business.length === 0) {
-            return res.status(404).json({ error: 'Business not found' });
+        if (subscribersData.length === 0) {
+            return res.status(404).json({ error: 'No subscribers found' });
         }
 
         const response = {
+            totalSubscribers, // Adding total subscriber count
             page: { 
-                totalPages: Math.ceil(business[0].totalSubscribers / parseInt(limit)), 
+                totalPages: Math.ceil(totalSubscribers / parseInt(limit)), 
                 currentPage: parseInt(page) 
             },
-            subscribers: business[0].subscribers,
-            totalSubscribers
+            subscribers: subscribersData[0].subscribers,
         };
 
         res.status(200).json(response);

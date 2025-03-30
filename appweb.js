@@ -2,7 +2,6 @@ const express = require('express');
 const errorHandler = require('./middleware/errorHandler'); // If using
 const app = express();
 
-// app.use('/', userRoutes);
 
 app.use('/android/:userId', (req, res) => {
     const userId = req.params.userId;

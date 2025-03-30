@@ -2,10 +2,10 @@
   "name": "pratik-pansare",
   "version": "1.0.0",
   "description": "pratik-pansare",
-  "main": "app.js",
+  "main": "appweb.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node appweb.js",
+    "dev": "nodemon appweb.js"
   },
   "dependencies": {
     "aws-sdk": "^2.1692.0",

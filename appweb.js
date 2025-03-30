@@ -3,7 +3,7 @@ const errorHandler = require('./middleware/errorHandler'); // If using
 const app = express();
 
 
-app.use('/android/:userId', (req, res) => {
+app.use('/qr/:userId', (req, res) => {
     const userId = req.params.userId;
 
     // Construct the deep link URL

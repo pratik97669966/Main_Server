@@ -10,7 +10,7 @@ app.use('/qr/:userId', (req, res) => {
     const deepLinkUrl = `dukanbikan://user/${userId}`;
 
     // Construct the Play Store URL
-    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.deal2funservice&hl=en_IN'; // Replace with your app's package name
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.deal2funservice&hl=en_IN';
 
     // Serve an HTML page to handle the redirection logic
     const htmlContent = `
@@ -35,26 +35,26 @@ app.use('/qr/:userId', (req, res) => {
     res.send(htmlContent);
 });
 
-app.use((req, res) => {
-    // Construct the Play Store URL
-    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.deal2funservice&hl=en_IN';
+// app.use((req, res) => {
+//     // Construct the Play Store URL
+//     const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.deal2funservice&hl=en_IN';
 
-    // Serve an HTML page to handle the redirection logic
-    const htmlContent = `
-        <html>
-        <head>
-            <script type="text/javascript"> 
-            window.location.href = "${playStoreUrl}";
-            </script>
-        </head>
-        <body>
-            <p>If you are not redirected, <a href="${playStoreUrl}">click here to open in Play Store</a>.</p>
-        </body>
-        </html>
-    `;
+//     // Serve an HTML page to handle the redirection logic
+//     const htmlContent = `
+//         <html>
+//         <head>
+//             <script type="text/javascript"> 
+//             window.location.href = "${playStoreUrl}";
+//             </script>
+//         </head>
+//         <body>
+//             <p>If you are not redirected, <a href="${playStoreUrl}">click here to open in Play Store</a>.</p>
+//         </body>
+//         </html>
+//     `;
 
-    res.send(htmlContent);
-});
+//     res.send(htmlContent);
+// });
 app.use(errorHandler);
 
 // Start the server
